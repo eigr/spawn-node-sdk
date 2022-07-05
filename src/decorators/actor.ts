@@ -17,8 +17,8 @@ export function ActorEntity(name: string, actorType: MessageType<object>, opts: 
     };
 }
 
-export function Command(inputMessage: MessageType<object> | null = null) {
+export function Command(responseType: 'reply' | 'noreply' = 'reply', inputMessage: MessageType<object> | null = null) {
     return function (target: Object, propertyKey: string, descriptor: PropertyDescriptor) {
-        Reflect.defineMetadata(`actor:command:${propertyKey}`, {function: descriptor.value, message: inputMessage }, target.constructor)
+        Reflect.defineMetadata(`actor:command:${propertyKey}`, {function: descriptor.value, message: inputMessage, responseType }, target.constructor)
     };
 }

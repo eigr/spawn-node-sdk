@@ -1,20 +1,22 @@
 import { ActorEntity, Command } from "decorators/actor";
 import { ActorOpts } from "actor_opts";
 import { Person, ChangePersonNameMessage } from "@protos/person";
-import { ActorContext } from 'actor_context'
+import { ActorContext, Value } from 'actor_context'
 
 @ActorEntity("test_actor_01", Person, {persistent: true, snapshotTimeout: 10000n, deactivatedTimeout: 50000n} as ActorOpts)
 export class PersonActor {
     context: ActorContext<Person> | null = null
 
     @Command()
-    get(context: ActorContext<Person>): Person {
-        return context.state
+    get(context: ActorContext<Person>): Value<Person> {
+        return context.getState() // or just access directly context.state
     }
 
-    @Command(ChangePersonNameMessage)
-    setName(message: ChangePersonNameMessage, context: ActorContext<Person>): Person {
-        return {...context.state, name: message.name}
+    @Command('noreply', ChangePersonNameMessage)
+    setName(message: ChangePersonNameMessage, context: ActorContext<Person>): Value<Person> {
+        context.setState({...context.state, name: message.name})
+
+        // or return {...context.state, name: message.name}
     }
 
     static toString() {

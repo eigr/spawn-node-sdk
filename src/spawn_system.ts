@@ -5,6 +5,7 @@ import { register, invoke } from 'node_fetch_client'
 import { startServer } from 'server'
 import type { ActorMetadata } from 'decorators/actor'
 import { GlobalEmitter } from 'global_event_emitter'
+import { Value } from 'actor_context'
 
 class SpawnSystem {
     serviceInfo: ServiceInfo = {
@@ -26,6 +27,7 @@ class SpawnSystem {
     };
 
     registrationRequest: RegistrationRequest = {}
+    actorEntities: {[key: string]: any} = {}
     actorClasses: {[key: string]: any} = {}
 
     constructor() {
@@ -38,10 +40,12 @@ class SpawnSystem {
         this.serviceInfo = serviceInfo
 
         const actors = this.buildActors(actorDefinitions)
-        const actorRegistries = actors.reduce((acc: object, [name, _entity, actor]: [string, Function, Actor]) => ({...acc, [name]: actor}), {})
-        const actorClasses = actors.reduce((acc: object, [name, entity, _actor]: [string, Function, Actor]) => ({...acc, [name]: entity}), {})
+        const actorRegistries = actors.reduce((acc: object, [name, _class, _entity, actor]: [string, Function, Function, Actor]) => ({...acc, [name]: actor}), {})
+        const actorEntities = actors.reduce((acc: object, [name, _class, entity, _actor]: [string, Function, Function, Actor]) => ({...acc, [name]: entity}), {})
+        const actorClasses = actors.reduce((acc: object, [name, entityClass, _entity, _actor]: [string, Function, Function, Actor]) => ({...acc, [name]: entityClass}), {})
 
         this.registry = { actors: actorRegistries } as Registry
+        this.actorEntities = actorEntities
         this.actorClasses = actorClasses
 
         this.actorSystem = {
@@ -60,8 +64,14 @@ class SpawnSystem {
             })
     }
 
-    async invoke(actorName: string, commandName: string, message: object | null = null) {
+    async invoke(actorName: string, commandName: string, message: object | null = null): Promise<Value<any>> {
         const actor = this.registry.actors[actorName]
+        const actorEntity = this.actorEntities[actorName]
+        const actorClass = this.actorClasses[actorName]
+
+        if (!actorClass) {
+            throw new Error(`Actor ${actorClass.name} is not registered`)
+        }
 
         let request: InvocationRequest = {
             system: this.actorSystem,
@@ -71,10 +81,22 @@ class SpawnSystem {
         }
 
         if (message) {
-            request.value = Any.pack(message, this.actorClasses[actorName])
+            request.value = Any.pack(message, actorEntity)
         }
 
-        const promise = new Promise((resolve, reject) => {
+        const commandMetadata = Reflect.getMetadata(`actor:command:${commandName}`, actorClass)
+
+        if (!commandMetadata) {
+            throw new Error(`Command ${commandName} for actor ${actorClass.name} is not registered`)
+        }
+
+        if (commandMetadata.responseType === 'noreply') {
+            await invoke(request)
+
+            return undefined
+        }
+
+        const promise = new Promise<Value<any>>((resolve, reject) => {
             GlobalEmitter.once(`actor:command:${this.actorSystem.name}:${actorName}:${commandName}`, function (data) {
                 resolve(data)
             });
@@ -93,7 +115,7 @@ class SpawnSystem {
                 return acc;
             }
 
-            return [...acc, [actorMeta.name, actorMeta.actorType, this.buildActorFromMetadata(actorMeta)]]
+            return [...acc, [actorMeta.name, actorEntity, actorMeta.actorType, this.buildActorFromMetadata(actorMeta)]]
         }, [])
     }
 
