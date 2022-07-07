@@ -1,8 +1,9 @@
 import { ActorInvocation, ActorInvocationResponse } from '@protos/eigr/functions/protocol/actors/protocol';
 import { Any } from '@protos/google/protobuf/any';
 import http, { ServerResponse } from 'node:http'
-import { GlobalEmitter } from 'global_event_emitter'
-import { ActorContext } from 'actor_context'
+import { GlobalEmitter } from '@spawn/integration/global_event_emitter'
+import { ActorContext } from '@spawn/client_actor/actor_context'
+import { MessageType } from "@protobuf-ts/runtime";
 
 function findCommandMetadata(registeredActors: Function[], commandName: string): any | null {
     for (const actorClass of registeredActors) {
@@ -11,7 +12,7 @@ function findCommandMetadata(registeredActors: Function[], commandName: string):
         if (commandMetadata) {
             const { actorType } = Reflect.getMetadata('actor:metadata', actorClass)
 
-            return { actorType, commandFunc: commandMetadata.function, messageType: commandMetadata.message }
+            return { actorType, commandFunc: commandMetadata.function, messageType: commandMetadata.message, responseType: commandMetadata.responseType }
         }
     }
 
@@ -37,13 +38,14 @@ function sendResponse(status: number, res: ServerResponse, resp: any = null) {
     res.end();
 }
 
-export function startServer(systemClass: Function, port = 8090) {
-    http.createServer((req, res) => {
+export function startServer(systemClass: Function, port = process.env.SPAWN_ACTION_PORT || 8090) {
+    return http.createServer((req, res) => {
         if (req.url === '/api/v1/actors/actions') {
             req.on('data', buffer => {
                 const { currentContext, actorName, actorSystem, commandName, value } = ActorInvocation.fromBinary(buffer)
                 const registeredActors: Function[] = Reflect.getMetadata(`actor:collection:${actorSystem}`, systemClass)
                 const metadata = findCommandMetadata(registeredActors, commandName)
+                const outputType = Reflect.getMetadata(`actor:invoke:output:${actorSystem}:${actorName}:${commandName}`, systemClass) as MessageType<object>
 
                 if (!metadata) {
                     const resp: ActorInvocationResponse = {
@@ -53,33 +55,33 @@ export function startServer(systemClass: Function, port = 8090) {
                         value
                     }
 
+                    GlobalEmitter.emit(`actor:command:${actorSystem}:${actorName}:${commandName}`, Any.create(currentContext?.state))
+
                     return sendResponse(200, res, resp)
                 }
 
                 const { actorType, messageType, commandFunc } = metadata
 
                 const commandValue = actorType.fromBinary(Any.create(currentContext?.state).value)
-                const commandMessage = value && messageType.fromBinary(Any.create(value).value)
+                const commandMessage = value && messageType?.fromBinary(Any.create(value).value)
+
                 const commandContext = new ActorContext<typeof commandValue>(commandValue)
                 
-                let modifiedState = commandFunc(...[commandMessage].filter(v => v), commandContext)
-                if (modifiedState === undefined) {
-                    modifiedState = commandContext.state
-                }
-
-                const newState = Any.pack(modifiedState, actorType)
+                const returnValue = commandFunc(...[commandMessage].filter(v => v), commandContext)
+                GlobalEmitter.emit(`actor:command:${actorSystem}:${actorName}:${commandName}`, returnValue)
                 
-                GlobalEmitter.emit(`actor:command:${actorSystem}:${actorName}:${commandName}`, modifiedState)
-                
-                const resp: ActorInvocationResponse = {
+                let resp: ActorInvocationResponse = {
                     actorName,
                     actorSystem,
                     updatedContext: {
-                        state: newState
-                    },
-                    value
+                        state: Any.pack(commandContext.getState(), actorType)
+                    }
                 }
-                    
+                
+                if (returnValue && outputType.is(returnValue)) {
+                    resp.value = Any.pack(returnValue, outputType)
+                }
+
                 sendResponse(200, res, resp)
             });
 

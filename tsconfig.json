@@ -13,10 +13,9 @@
     "compilerOptions": {
         "lib": ["es2021", "dom"],
 
-        "baseUrl": "./src",
-
         "paths": {
-            "@protos/*": ["protos/*"]
+          "@protos/*": ["./src/protos/*"],
+          "@spawn/*": ["./src/*"]
         },
 
         "experimentalDecorators": true

@@ -1,14 +1,17 @@
 import { ActorSystem, Registry, ActorState, Actor, ActorSnapshotStrategy, ActorDeactivateStrategy, TimeoutStrategy } from '@protos/eigr/functions/protocol/actors/actor'
 import { RegistrationRequest, InvocationRequest, ServiceInfo } from '@protos/eigr/functions/protocol/actors/protocol'
 import { Any } from '@protos/google/protobuf/any'
-import { register, invoke } from 'node_fetch_client'
-import { startServer } from 'server'
-import type { ActorMetadata } from 'decorators/actor'
-import { GlobalEmitter } from 'global_event_emitter'
-import { Value } from 'actor_context'
+import { register, invoke } from '@spawn/integration/node_fetch_client'
+import { startServer } from '@spawn/integration/server'
+import type { ActorMetadata } from '@spawn/decorators/actor'
+import { GlobalEmitter } from '@spawn/integration/global_event_emitter'
+import { Value } from '@spawn/client_actor/actor_context'
+import { SpawnInvocationWrongOutput } from '@spawn/integration/errors'
+import { MessageType } from "@protobuf-ts/runtime";
+import type { Server } from 'node:http'
 
 class SpawnSystem {
-    serviceInfo: ServiceInfo = {
+    private serviceInfo: ServiceInfo = {
         serviceName: 'nodejs_sdk',
         serviceVersion: '0.1.0',
         serviceRuntime: `nodejs_${process.version}`,
@@ -18,20 +21,20 @@ class SpawnSystem {
         protocolMinorVersion: 1,
     }
 
-    registry: Registry = {
+    private registry: Registry = {
         actors: {}
     }
 
-    actorSystem: ActorSystem = {
+    private actorSystem: ActorSystem = {
         name: 'actor_system'
     };
 
-    registrationRequest: RegistrationRequest = {}
-    actorEntities: {[key: string]: any} = {}
-    actorClasses: {[key: string]: any} = {}
+    private registrationRequest: RegistrationRequest = {}
+    private actorClasses: {[key: string]: any} = {}
+    private httpServer: Server;
 
     constructor() {
-        startServer(this.constructor)
+        this.httpServer = startServer(this.constructor)
     }
 
     init(actorDefinitions: Function[] = [], systemName = this.actorSystem.name, serviceInfo: ServiceInfo = this.serviceInfo) {
@@ -41,11 +44,9 @@ class SpawnSystem {
 
         const actors = this.buildActors(actorDefinitions)
         const actorRegistries = actors.reduce((acc: object, [name, _class, _entity, actor]: [string, Function, Function, Actor]) => ({...acc, [name]: actor}), {})
-        const actorEntities = actors.reduce((acc: object, [name, _class, entity, _actor]: [string, Function, Function, Actor]) => ({...acc, [name]: entity}), {})
         const actorClasses = actors.reduce((acc: object, [name, entityClass, _entity, _actor]: [string, Function, Function, Actor]) => ({...acc, [name]: entityClass}), {})
 
         this.registry = { actors: actorRegistries } as Registry
-        this.actorEntities = actorEntities
         this.actorClasses = actorClasses
 
         this.actorSystem = {
@@ -64,40 +65,51 @@ class SpawnSystem {
             })
     }
 
-    async invoke(actorName: string, commandName: string, message: object | null = null): Promise<Value<any>> {
+    async invoke(actorName: string, commandName: string, outputType: MessageType<object>, message: object | null = null): Promise<Value<any>> {
         const actor = this.registry.actors[actorName]
-        const actorEntity = this.actorEntities[actorName]
         const actorClass = this.actorClasses[actorName]
-
-        if (!actorClass) {
-            throw new Error(`Actor ${actorClass.name} is not registered`)
-        }
 
         let request: InvocationRequest = {
             system: this.actorSystem,
-            actor: actor,
+            actor: this.invocationActor(actorName, actor),
             commandName: commandName,
             async: false
         }
+        
+        Reflect.defineMetadata(`actor:invoke:output:${this.actorSystem.name}:${actorName}:${commandName}`, outputType, this.constructor)
+        
+        if (actorClass) {
+            const commandMetadata = Reflect.getMetadata(`actor:command:${commandName}`, actorClass)
 
-        if (message) {
-            request.value = Any.pack(message, actorEntity)
+            if (message) {
+                request.value = Any.pack(message, commandMetadata.message)
+            }
+            
+            if (commandMetadata?.responseType === 'noreply') {
+                await invoke(request)
+
+                return undefined
+            }
         }
 
-        const commandMetadata = Reflect.getMetadata(`actor:command:${commandName}`, actorClass)
-
-        if (!commandMetadata) {
-            throw new Error(`Command ${commandName} for actor ${actorClass.name} is not registered`)
-        }
-
-        if (commandMetadata.responseType === 'noreply') {
-            await invoke(request)
-
-            return undefined
-        }
-
-        const promise = new Promise<Value<any>>((resolve, reject) => {
+        const promise = new Promise<Value<any>>((resolve, _reject) => {
             GlobalEmitter.once(`actor:command:${this.actorSystem.name}:${actorName}:${commandName}`, function (data) {
+                if (!data) {
+                    return resolve(data)
+                }
+                
+                if (Any.is(data)) {
+                    try {
+                        data = Any.unpack(data, outputType)
+                    } catch {
+                        throw new SpawnInvocationWrongOutput(`The actor doesnt return the referenced output type, got: ${data.typeUrl}, expected: ${outputType.constructor.name}`)
+                    }
+                }
+
+                if (!outputType.is(data)) {
+                    throw new SpawnInvocationWrongOutput(`The actor doesnt return the referenced output type, got: ${JSON.stringify(data)}, expected instance of: ${outputType.constructor.name}`)
+                }
+                
                 resolve(data)
             });
         });
@@ -105,6 +117,10 @@ class SpawnSystem {
         await invoke(request)
 
         return promise;
+    }
+
+    getServer(): Server {
+        return this.httpServer
     }
 
     private buildActors(actorDefinitions: Function[]) {
@@ -117,6 +133,15 @@ class SpawnSystem {
 
             return [...acc, [actorMeta.name, actorEntity, actorMeta.actorType, this.buildActorFromMetadata(actorMeta)]]
         }, [])
+    }
+
+    private invocationActor(name: string, actor?: Actor): Actor {
+        if (actor) return actor;
+
+        return Actor.create({
+            name,
+            persistent: true
+        })
     }
 
     private buildActorFromMetadata(prop: ActorMetadata): Actor {

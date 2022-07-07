@@ -102,9 +102,9 @@ export interface ProxyInfo {
  */
 export interface RegistrationResponse {
     /**
-     * @generated from protobuf field: eigr.functions.protocol.RequestStatus staus = 1;
+     * @generated from protobuf field: eigr.functions.protocol.RequestStatus status = 1;
      */
-    staus?: RequestStatus;
+    status?: RequestStatus;
     /**
      * @generated from protobuf field: eigr.functions.protocol.ProxyInfo proxy_info = 2;
      */
@@ -508,7 +508,7 @@ export const ProxyInfo = new ProxyInfo$Type();
 class RegistrationResponse$Type extends MessageType<RegistrationResponse> {
     constructor() {
         super("eigr.functions.protocol.RegistrationResponse", [
-            { no: 1, name: "staus", kind: "message", T: () => RequestStatus },
+            { no: 1, name: "status", kind: "message", T: () => RequestStatus },
             { no: 2, name: "proxy_info", kind: "message", T: () => ProxyInfo }
         ]);
     }
@@ -524,8 +524,8 @@ class RegistrationResponse$Type extends MessageType<RegistrationResponse> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* eigr.functions.protocol.RequestStatus staus */ 1:
-                    message.staus = RequestStatus.internalBinaryRead(reader, reader.uint32(), options, message.staus);
+                case /* eigr.functions.protocol.RequestStatus status */ 1:
+                    message.status = RequestStatus.internalBinaryRead(reader, reader.uint32(), options, message.status);
                     break;
                 case /* eigr.functions.protocol.ProxyInfo proxy_info */ 2:
                     message.proxyInfo = ProxyInfo.internalBinaryRead(reader, reader.uint32(), options, message.proxyInfo);
@@ -542,9 +542,9 @@ class RegistrationResponse$Type extends MessageType<RegistrationResponse> {
         return message;
     }
     internalBinaryWrite(message: RegistrationResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* eigr.functions.protocol.RequestStatus staus = 1; */
-        if (message.staus)
-            RequestStatus.internalBinaryWrite(message.staus, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* eigr.functions.protocol.RequestStatus status = 1; */
+        if (message.status)
+            RequestStatus.internalBinaryWrite(message.status, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         /* eigr.functions.protocol.ProxyInfo proxy_info = 2; */
         if (message.proxyInfo)
             ProxyInfo.internalBinaryWrite(message.proxyInfo, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
