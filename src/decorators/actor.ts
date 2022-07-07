@@ -1,4 +1,4 @@
-import { ActorOpts } from '@spawn/client_actor/actor_opts'
+import { ActorOpts } from '../client_actor/actor_opts'
 import { MessageType } from "@protobuf-ts/runtime";
 
 export interface ActorMetadata {

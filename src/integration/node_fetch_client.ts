@@ -1,5 +1,5 @@
-import { InvocationRequest, InvocationResponse, RegistrationRequest, RegistrationResponse, Status, RequestStatus } from "@protos/eigr/functions/protocol/actors/protocol";
-import { SpawnInvocationError, SpawnRegisterError } from '@spawn/integration/errors'
+import { InvocationRequest, InvocationResponse, RegistrationRequest, RegistrationResponse, Status, RequestStatus } from "../protos/eigr/functions/protocol/actors/protocol";
+import { SpawnInvocationError, SpawnRegisterError } from '../integration/errors'
 import fetch from 'node-fetch'
 
 export async function register(registration: RegistrationRequest): Promise<RegistrationResponse> {

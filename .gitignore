@@ -8,6 +8,7 @@ lib-cov
 *.gz
 *.swp
 
+_build
 pids
 logs
 results

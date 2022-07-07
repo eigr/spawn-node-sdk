@@ -1,6 +1,8 @@
 {
     // This is an alias to @tsconfig/node16: https://github.com/tsconfig/bases
     "extends": "@tsconfig/node16/tsconfig.json",
+    "exclude": ["node_modules"],
+    "include": ["index.ts", "src/**/*"],
   
     // Most ts-node options can be specified here using their programmatic names.
     "ts-node": {
@@ -11,12 +13,13 @@
       "files": true
     },
     "compilerOptions": {
-        "lib": ["es2021", "dom"],
+        "lib": ["ES6"],
+        "target": "ES2020",
+        "module": "commonjs",
+        "sourceMap": true,
 
-        "paths": {
-          "@protos/*": ["./src/protos/*"],
-          "@spawn/*": ["./src/*"]
-        },
+        "outDir": "_build",
+        "declaration": true,
 
         "experimentalDecorators": true
     }

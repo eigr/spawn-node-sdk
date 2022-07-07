@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 
-import SpawnSystem from '@spawn/spawn_system'
+import SpawnSystem from './src/spawn_system'
 
-export { ActorEntity, Command } from '@spawn/decorators/actor'
-export * from '@spawn/integration/errors'
-export { ActorContext, Value } from '@spawn/client_actor/actor_context'
-export { ActorOpts } from '@spawn/client_actor/actor_opts'
+export { ActorEntity, Command } from './src/decorators/actor'
+export * from './src/integration/errors'
+export { ActorContext, Value } from './src/client_actor/actor_context'
+export { ActorOpts } from './src/client_actor/actor_opts'
 
 export { SpawnSystem }

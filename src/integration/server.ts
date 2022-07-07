@@ -1,8 +1,8 @@
-import { ActorInvocation, ActorInvocationResponse } from '@protos/eigr/functions/protocol/actors/protocol';
-import { Any } from '@protos/google/protobuf/any';
+import { ActorInvocation, ActorInvocationResponse } from '../protos/eigr/functions/protocol/actors/protocol';
+import { Any } from '../protos/google/protobuf/any';
 import http, { ServerResponse } from 'node:http'
-import { GlobalEmitter } from '@spawn/integration/global_event_emitter'
-import { ActorContext } from '@spawn/client_actor/actor_context'
+import { GlobalEmitter } from '../integration/global_event_emitter'
+import { ActorContext } from '../client_actor/actor_context'
 import { MessageType } from "@protobuf-ts/runtime";
 
 function findCommandMetadata(registeredActors: Function[], commandName: string): any | null {
@@ -89,5 +89,8 @@ export function startServer(systemClass: Function, port = process.env.SPAWN_ACTI
         }
 
         sendResponse(404, res)
-    }).listen(port)
+    })
+    .listen(port, () => {
+        console.log(`[SpawnSystem] Server listening on :${port}`)
+    })
 }
