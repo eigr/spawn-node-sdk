@@ -1,6 +1,7 @@
 {
-    // This is an alias to @tsconfig/node16: https://github.com/tsconfig/bases
-    "extends": "@tsconfig/node16/tsconfig.json",
+    // This is an alias to @tsconfig/node14: https://github.com/tsconfig/bases
+    "extends": "@tsconfig/node14/tsconfig.json",
+
     "exclude": ["node_modules"],
     "include": ["index.ts", "src/**/*"],
   
