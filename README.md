@@ -2,9 +2,13 @@
 
 See ./test for examples
 
+## Installing
+
+Run `yarn add NAME_TO_BE_DEFINED`
+
 ## Testing
 
-Run `npm test`
+Run `yarn test`
 
 ## Environment variables:
 

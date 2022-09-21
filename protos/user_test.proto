@@ -1,20 +1,20 @@
 syntax = "proto3";
 
 message UserState {
-    string name = 1;
-    optional string nickname = 2;
+  string name = 1;
+  string nickname = 2;
 }
 
 message ChangeUserName {
-    string new_name = 1;
+  string new_name = 1;
 }
 
 enum ChangeUserNameStatus {
-    NAME_ALREADY_TAKEN = 0;
-    OK = 1;
+  NAME_ALREADY_TAKEN = 0;
+  OK = 1;
 }
 
 message ChangeUserNameResponse {
-    ChangeUserNameStatus status = 1;
-    string new_name = 2;
+  ChangeUserNameStatus status = 1;
+  string new_name = 2;
 }

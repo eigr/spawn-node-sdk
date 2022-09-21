@@ -1,3 +1,8 @@
-import EventEmitter from 'events'
+import { EventEmitter } from 'node:events';
 
-export const GlobalEmitter = new EventEmitter()
+class GlobalEmitter extends EventEmitter {}
+
+const emmiter = new GlobalEmitter();
+emmiter.setMaxListeners(Infinity);
+
+export default emmiter;
