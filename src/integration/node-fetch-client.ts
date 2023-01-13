@@ -6,12 +6,12 @@ import {
   Status,
   RequestStatus
 } from '../protos/eigr/functions/protocol/actors/protocol';
-import { SpawnInvocationError, SpawnRegisterError } from '../integration/errors';
+import { SpawnInvocationError, SpawnRegisterError } from './errors';
 import fetch from 'node-fetch';
 
-export async function register(registration: RegistrationRequest): Promise<RegistrationResponse> {
+export async function registerRequest(registration: RegistrationRequest): Promise<RegistrationResponse> {
   const body = RegistrationRequest.toBinary(registration);
-  const url = process.env.SPAWN_PROXY_URL || 'http://localhost:9001';
+  const url = process.env.SPAWN_PROXY_URL || 'http://localhost:9006';
 
   const res = await fetch(`${url}/api/v1/system`, {
     method: 'POST',
@@ -32,12 +32,12 @@ export async function register(registration: RegistrationRequest): Promise<Regis
   return response;
 }
 
-export async function invoke(request: InvocationRequest): Promise<InvocationResponse> {
+export async function invokeRequest(request: InvocationRequest): Promise<InvocationResponse> {
   const body = InvocationRequest.toBinary(request);
-  const url = process.env.SPAWN_PROXY_URL || 'http://localhost:9001';
+  const url = process.env.SPAWN_PROXY_URL || 'http://localhost:9006';
 
   const res = await fetch(
-    `${url}/api/v1/system/${request.system?.name}/actors/${request.actor?.name}/invoke`,
+    `${url}/api/v1/system/${request.system?.name}/actors/${request.actor?.id?.name}/invoke`,
     {
       method: 'POST',
       headers: {

@@ -1,6 +1,7 @@
 import { ActorInvocationResponse } from '../protos/eigr/functions/protocol/actors/protocol';
 import http, { ServerResponse, IncomingMessage } from 'node:http';
-import { InvokeActionsController } from './controller/invoke_actions_controller';
+import { registerControllerHandler } from './controller/invoke-actions-controller';
+import { ActorCallbackConnector } from '../spawn';
 
 export function sendResponse(status: number, res: ServerResponse, resp: any = null) {
   if (status !== 200 || !resp) {
@@ -21,11 +22,11 @@ export function sendResponse(status: number, res: ServerResponse, resp: any = nu
   res.end();
 }
 
-export function startServer(systemClass: Function, port = process.env.SPAWN_ACTION_PORT || 8090) {
+export function startServer(actorCallbacks: Map<string, ActorCallbackConnector>, port = process.env.SPAWN_ACTION_PORT || 8090) {
   return http
     .createServer((req: IncomingMessage, res: ServerResponse) => {
       if (req.url === '/api/v1/actors/actions') {
-        InvokeActionsController.registerControllerHandler(req, res, { systemClass });
+        registerControllerHandler(req, res, actorCallbacks);
 
         return;
       }

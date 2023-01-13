@@ -8,7 +8,8 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "proto-gen": "protoc --ts_out ./src/protos/ --proto_path protos protos/*.proto",
+    "proto-gen": "protoc --ts_out ./src/protos/ --proto_path protos protos/**/*.proto",
+    "proto-gen-spawn": "protoc --ts_out ./src/protos/eigr/functions/protocol/actors --proto_path protos/eigr/functions/protocol/actors protos/eigr/functions/protocol/actors/*.proto",
     "start": "ts-node --esm --require tsconfig-paths/register index.ts",
     "run-benchmark": "ts-node --esm --require tsconfig-paths/register benchmark/benchmark.ts",
     "test": "jest --forceExit",

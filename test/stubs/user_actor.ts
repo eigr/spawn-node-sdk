@@ -1,12 +1,14 @@
 import { ActorEntity, Command } from '../../src/decorators/actor';
-import { ActorOpts } from '../../src/client_actor/actor_opts';
+import { ActorOpts } from '../../src/client-actor/actor-opts';
 import {
   UserState,
   ChangeUserName,
   ChangeUserNameResponse,
   ChangeUserNameStatus
 } from '../protos/user_test';
-import { ActorContext, Value } from '../../src/client_actor/actor_context';
+import { ActorContext, Value } from '../../src/client-actor/context';
+
+
 
 @ActorEntity('user_actor_01', UserState, {
   persistent: true,
@@ -34,3 +36,23 @@ export class UserActor {
     });
   }
 }
+
+// const Value = { of: () => {}}
+// const initSpawnSystem = (a: string) => ({ addActor: (a, b, c) => ({ addAction: (a, c) => {}, register: () => {}})})
+// const opts = {}
+
+
+
+// const system = spawn.createSystem('system_01')
+
+// const actor = system.buildActor('user_actor_01', UserState, { ...opts })
+
+// actor.addAction({ name: 'actionName', reply: false }, (_context: ActorContext<UserState>) => {
+//   return Value.of()
+// })
+
+// system.register()
+
+// const invocation = await spawn.invoke('user_actor_01', ...)
+
+

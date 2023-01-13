@@ -18,6 +18,11 @@ export class SpawnInvocationWrongOutput extends Error {
 export class SpawnInvocationMissingResponse extends Error {
   name: string = 'SpawnInvocationMissingResponse';
 }
+
+export class SpawnSystemRegisteredError extends Error {
+  name: string = 'SpawnSystemRegisteredError';
+}
+
 export class SpawnRegisterError extends Error {
   name: string = 'SpawnRegisterError';
   message: string = '';

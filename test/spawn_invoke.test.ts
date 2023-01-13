@@ -8,7 +8,7 @@ import {
 import { UserActor } from './stubs/user_actor';
 import * as crypto from 'crypto';
 import { ActorEntity } from '../src/decorators/actor';
-import { ActorContext } from '../src/client_actor/actor_context';
+import { ActorContext } from '../src/client-actor/context';
 
 const randomActorName = crypto.randomBytes(16).toString('hex');
 
