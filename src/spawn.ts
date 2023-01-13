@@ -1,13 +1,31 @@
-import { registerRequest, invokeRequest } from "./integration/node-fetch-client";
-import { Actor, ActorId, ActorSystem, Registry } from './protos/eigr/functions/protocol/actors/actor';
-import { InvocationRequest, Noop, RegistrationRequest, RegistrationResponse, ServiceInfo } from "./protos/eigr/functions/protocol/actors/protocol";
-import { ActorContext } from "./client-actor/context";
-import { SpawnSystemRegisteredError } from "./integration/errors";
-import { ActorOpts, buildActorForSystem, defaultActorOpts } from "./client-actor/definitions";
-import { buildPayload, parseScheduledTo, PayloadRef, scheduledToBigInt, unpack, unpackPayload } from "./integration/parsers";
-import { startServer } from "./integration/server";
-import { MessageType } from '@protobuf-ts/runtime';
-import { Value } from "./client-actor/value";
+import { registerRequest, invokeRequest } from './integration/node-fetch-client'
+import {
+  Actor,
+  ActorId,
+  ActorSystem,
+  Registry
+} from './protos/eigr/functions/protocol/actors/actor'
+import {
+  InvocationRequest,
+  Noop,
+  RegistrationRequest,
+  RegistrationResponse,
+  ServiceInfo
+} from './protos/eigr/functions/protocol/actors/protocol'
+import { ActorContext } from './client-actor/context'
+import { SpawnSystemRegisteredError } from './integration/errors'
+import { ActorOpts, buildActorForSystem, defaultActorOpts } from './client-actor/definitions'
+import {
+  buildPayload,
+  parseScheduledTo,
+  PayloadRef,
+  scheduledToBigInt,
+  unpack,
+  unpackPayload
+} from './integration/parsers'
+import { startServer } from './integration/server'
+import { MessageType } from '@protobuf-ts/runtime'
+import { Value } from './client-actor/value'
 
 /**
  * Action definition opts
@@ -16,18 +34,26 @@ import { Value } from "./client-actor/value";
  */
 export type ActorActionOpts = {
   name: string
-  payloadType: MessageType<any>,
+  payloadType: MessageType<any>
   timer?: number
 }
 
-export type ActorActionCallback<T extends object = any, K extends object = any> = (context: ActorContext<T>, payload: any) => Promise<Value<T, K>>
-export type ActorCallbackConnector = { stateType: any, payloadType: any, callback: ActorActionCallback }
+export type ActorActionCallback<T extends object = any, K extends object = any> = (
+  context: ActorContext<T>,
+  payload: any
+) => Promise<Value<T, K>>
+export type ActorCallbackConnector = {
+  stateType: any
+  payloadType: any
+  callback: ActorActionCallback
+}
 
 let uniqueDefaultSystem = 'spawn_system'
 let systemCreated = false
 
 const createSystem = (system: string = uniqueDefaultSystem) => {
-  if (systemCreated) throw new SpawnSystemRegisteredError("This API currently supports only one system per runtime.")
+  if (systemCreated)
+    throw new SpawnSystemRegisteredError('This API currently supports only one system per runtime.')
 
   uniqueDefaultSystem = system
   systemCreated = true
@@ -40,10 +66,10 @@ const createSystem = (system: string = uniqueDefaultSystem) => {
     supportLibraryVersion: '',
     protocolMajorVersion: 1,
     protocolMinorVersion: 1
-  } as ServiceInfo;
+  } as ServiceInfo
 
-  const registry = { actors: {} } as Registry;
-  const actorSystem = { name: system, registry } as ActorSystem;
+  const registry = { actors: {} } as Registry
+  const actorSystem = { name: system, registry } as ActorSystem
   const registeredCallbacks = new Map<string, ActorCallbackConnector>()
   let registered = false
 
@@ -52,19 +78,19 @@ const createSystem = (system: string = uniqueDefaultSystem) => {
   return {
     /**
      * Builds an actor for this system with the following default options:
-     * 
+     *
      * - kind: POOLED
      * - stateful: true
      * - snapshotTimeout: 10_000n
      * - deactivatedTimeout: 2_000n
-     * 
+     *
      * @param opts - options for creating the actor
      */
     buildActor: (opts: ActorOpts) => {
       const registeredErrorMsg = `You cannot build more actors after registering the system. If you are trying to add dynamic actors or actions, you are probably mising some concept`
       if (registered) throw new SpawnSystemRegisteredError(registeredErrorMsg)
-      
-      const overridenOpts = {...defaultActorOpts, ...opts}
+
+      const overridenOpts = { ...defaultActorOpts, ...opts }
       const actor = buildActorForSystem(system, overridenOpts)
       const actorName = actor!.id!.name
 
@@ -83,44 +109,44 @@ const createSystem = (system: string = uniqueDefaultSystem) => {
           if (registered) throw new SpawnSystemRegisteredError(registeredErrorMsg)
 
           if (actionOpts.timer) {
-            actor.timerCommands.push({ command: { name: actionOpts.name }, seconds: actionOpts.timer })
+            actor.timerCommands.push({
+              command: { name: actionOpts.name },
+              seconds: actionOpts.timer
+            })
           } else {
             actor.commands.push({ name: actionOpts.name })
           }
 
-          registeredCallbacks.set(
-            `${system}${actorName}${actionOpts.name}`,
-            {
-              callback,
-              stateType: opts.stateType || Noop,
-              payloadType: actionOpts.payloadType || Noop,
-            }
-          )
+          registeredCallbacks.set(`${system}${actorName}${actionOpts.name}`, {
+            callback,
+            stateType: opts.stateType || Noop,
+            payloadType: actionOpts.payloadType || Noop
+          })
         }
       }
     },
     register: async (): Promise<RegistrationResponse> => {
-      const registrationRequest = { serviceInfo, actorSystem } as RegistrationRequest;
+      const registrationRequest = { serviceInfo, actorSystem } as RegistrationRequest
       return registerRequest(registrationRequest).then((response) => {
         registered = true
 
-        return response;
+        return response
       })
     }
   }
 }
 
 export type InvokeOpts = {
-  command: string;
-  system?: string;
-  response?: MessageType<any>;
-  payload?: PayloadRef<any>;
-  async?: boolean;
-  pooled?: boolean;
-  metadata?: { [key: string]: string };
-  ref?: string;
-  scheduledTo?: Date;
-  delay?: number;
+  command: string
+  system?: string
+  response?: MessageType<any>
+  payload?: PayloadRef<any>
+  async?: boolean
+  pooled?: boolean
+  metadata?: { [key: string]: string }
+  ref?: string
+  scheduledTo?: Date
+  delay?: number
 }
 
 /**
@@ -143,10 +169,10 @@ export type InvokeOpts = {
  * - delay - (optional) The delay in ms this will be invoked
  */
 const invoke = async (actorName: string, invokeOpts: InvokeOpts) => {
-  let async = invokeOpts.async || false;
-  let system = invokeOpts.system || uniqueDefaultSystem;
-  let pooled = invokeOpts.pooled || false;
-  let metadata = invokeOpts.metadata || {};
+  let async = invokeOpts.async || false
+  let system = invokeOpts.system || uniqueDefaultSystem
+  let pooled = invokeOpts.pooled || false
+  let metadata = invokeOpts.metadata || {}
 
   const request = InvocationRequest.create({
     system: ActorSystem.create({ name: system }),
@@ -172,9 +198,7 @@ const invoke = async (actorName: string, invokeOpts: InvokeOpts) => {
 }
 
 // TODO: Spawn Actor
-const spawnActor = async () => {
-
-}
+const spawnActor = async () => {}
 
 export const payloadFor = (type: MessageType<any>, value: any): PayloadRef => {
   return { ref: type, instance: type.create(value) }

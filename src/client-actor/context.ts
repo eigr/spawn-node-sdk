@@ -1,11 +1,11 @@
-import { ActorId } from "../protos/eigr/functions/protocol/actors/actor";
-import { PayloadRef } from "../integration/parsers";
+import { ActorId } from '../protos/eigr/functions/protocol/actors/actor'
+import { PayloadRef } from '../integration/parsers'
 
 export type ActorContext<T> = {
-  state: T;
-  caller: ActorId;
-  self: ActorId;
-  metadata: { [key: string]: string; };
+  state: T
+  caller: ActorId
+  self: ActorId
+  metadata: { [key: string]: string }
 }
 
 export type Broadcast = {
@@ -30,5 +30,3 @@ export type Forward = {
   actorName: string
   command: string
 }
-
-

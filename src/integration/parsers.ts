@@ -1,18 +1,24 @@
-import { Broadcast, Effect } from "../client-actor/context";
-import { Actor, ActorId, ActorSystem } from '../protos/eigr/functions/protocol/actors/actor';
-import { Noop, SideEffect, InvocationRequest, Broadcast as BroadcastProto } from "../protos/eigr/functions/protocol/actors/protocol";
-import { Any } from "../protos/google/any";
-import { MessageType } from '@protobuf-ts/runtime';
+import { Broadcast, Effect } from '../client-actor/context'
+import { Actor, ActorId, ActorSystem } from '../protos/eigr/functions/protocol/actors/actor'
+import {
+  Noop,
+  SideEffect,
+  InvocationRequest,
+  Broadcast as BroadcastProto
+} from '../protos/eigr/functions/protocol/actors/protocol'
+import { Any } from '../protos/google/any'
+import { MessageType } from '@protobuf-ts/runtime'
 
-type OneofPayload = { oneofKind: 'value'; value: Any; } 
-  | { oneofKind: 'noop'; noop: Noop; } 
-  | { oneofKind: undefined; }
+type OneofPayload =
+  | { oneofKind: 'value'; value: Any }
+  | { oneofKind: 'noop'; noop: Noop }
+  | { oneofKind: undefined }
 
-export type PayloadRef<T extends object = any> = { ref: MessageType<T>, instance: any }
+export type PayloadRef<T extends object = any> = { ref: MessageType<T>; instance: any }
 
 export const unpackPayload = (payload: OneofPayload, type: MessageType<any>) => {
   if (payload.oneofKind === undefined) {
-    return null;
+    return null
   }
 
   if (payload.oneofKind === 'noop') {
@@ -47,12 +53,12 @@ export const scheduledToBigInt = (scheduledTo: Date | number | undefined): bigin
     return BigInt(scheduledTo)
   }
 
-  return undefined;
+  return undefined
 }
 
 export const buildBroadcast = (broadcast: Broadcast | undefined): BroadcastProto | undefined => {
-  if (!broadcast) return undefined;
-  
+  if (!broadcast) return undefined
+
   return BroadcastProto.create({
     channelGroup: broadcast.channel,
     commandName: broadcast.command,
@@ -61,9 +67,9 @@ export const buildBroadcast = (broadcast: Broadcast | undefined): BroadcastProto
 }
 
 export const buildSideEffects = (callerName: string, system: string, effects?: Effect[]) => {
-  if (!effects) return undefined;
+  if (!effects) return undefined
 
-  return effects.map(effect => {
+  return effects.map((effect) => {
     const payload = buildPayload(effect.payload)
     const request = InvocationRequest.create({
       system: ActorSystem.create({ name: system }),
@@ -83,23 +89,23 @@ export const buildSideEffects = (callerName: string, system: string, effects?: E
 
 export const parseScheduledTo = (delayMs?: number, scheduledTo?: Date): number | undefined => {
   if (!delayMs && !scheduledTo) {
-    return undefined;
+    return undefined
   }
 
   if (typeof delayMs === 'number') {
-    scheduledTo = new Date(Date.now() + delayMs);
-    return parseScheduledTo(undefined, scheduledTo);
+    scheduledTo = new Date(Date.now() + delayMs)
+    return parseScheduledTo(undefined, scheduledTo)
   }
 
   if (!scheduledTo) {
-    return undefined;
+    return undefined
   }
 
-  return scheduledTo.getTime();
+  return scheduledTo.getTime()
 }
 
 export const unpack = (value: any, type: MessageType<any>) => {
-  if (!value) return null;
+  if (!value) return null
 
   return Any.unpack(value, type)
 }

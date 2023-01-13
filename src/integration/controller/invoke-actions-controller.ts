@@ -3,38 +3,42 @@ import {
   ActorInvocationResponse,
   Context,
   Noop
-} from '../../protos/eigr/functions/protocol/actors/protocol';
-import { ActorContext } from '../../client-actor/context';
-import { ServerResponse, IncomingMessage } from 'node:http';
-import { sendResponse } from '../server';
-import { ActorCallbackConnector } from '../../spawn';
-import { Any } from '../../protos/google/any';
-import { buildBroadcast, buildPayload, buildSideEffects, unpack } from '../parsers';
+} from '../../protos/eigr/functions/protocol/actors/protocol'
+import { ActorContext } from '../../client-actor/context'
+import { ServerResponse, IncomingMessage } from 'node:http'
+import { sendResponse } from '../server'
+import { ActorCallbackConnector } from '../../spawn'
+import { Any } from '../../protos/google/any'
+import { buildBroadcast, buildPayload, buildSideEffects, unpack } from '../parsers'
 
-export const registerControllerHandler = (req: IncomingMessage, res: ServerResponse, actorCallbacks: Map<string, ActorCallbackConnector>) => {
+export const registerControllerHandler = (
+  req: IncomingMessage,
+  res: ServerResponse,
+  actorCallbacks: Map<string, ActorCallbackConnector>
+) => {
   req.on('data', async (buffer: Buffer) => {
-    const { currentContext, actor, payload, commandName, caller } = ActorInvocation.fromBinary(buffer);
-    console.log('currentContext')
-    console.log(currentContext)
+    const { currentContext, actor, payload, commandName, caller } =
+      ActorInvocation.fromBinary(buffer)
+
     const callbackData = actorCallbacks.get(`${actor?.system}${actor?.name}${commandName}`)
 
     if (!callbackData) {
-      const resp = ActorInvocationResponse.create({ 
+      const resp = ActorInvocationResponse.create({
         actorName: actor?.name,
         actorSystem: actor?.system,
-        updatedContext: currentContext 
+        updatedContext: currentContext
       })
 
-      return sendResponse(200, res, resp);
+      return sendResponse(200, res, resp)
     }
 
-    const { stateType, payloadType, callback } = callbackData;
+    const { stateType, payloadType, callback } = callbackData
 
     const state = currentContext!.state && unpack(currentContext!.state, stateType)
-    const context: ActorContext<any> = { 
+    const context: ActorContext<any> = {
       state: state || Noop.create(),
-      caller: currentContext!.caller!, 
-      self: currentContext!.self!, 
+      caller: currentContext!.caller!,
+      self: currentContext!.self!,
       metadata: currentContext!.metadata!
     }
 
@@ -72,6 +76,5 @@ export const registerControllerHandler = (req: IncomingMessage, res: ServerRespo
     })
 
     sendResponse(200, res, response)
-  });
+  })
 }
-
