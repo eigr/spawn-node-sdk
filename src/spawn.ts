@@ -1,4 +1,4 @@
-import { registerRequest, invokeRequest } from './integration/node-fetch-client'
+import { registerRequest, invokeRequest, spawnActorRequest } from './integration/node-fetch-client'
 import {
   Actor,
   ActorId,
@@ -10,7 +10,9 @@ import {
   Noop,
   RegistrationRequest,
   RegistrationResponse,
-  ServiceInfo
+  ServiceInfo,
+  SpawnRequest,
+  SpawnResponse
 } from './protos/eigr/functions/protocol/actors/protocol'
 import { ActorContext } from './client-actor/context'
 import { SpawnSystemRegisteredError } from './integration/errors'
@@ -20,7 +22,6 @@ import {
   parseScheduledTo,
   PayloadRef,
   scheduledToBigInt,
-  unpack,
   unpackPayload
 } from './integration/parsers'
 import { startServer } from './integration/server'
@@ -48,10 +49,67 @@ export type ActorCallbackConnector = {
   callback: ActorActionCallback
 }
 
+export type SpawnSystem = {
+  buildActor: (opts: ActorOpts) => {
+    addAction: (actionOpts: ActorActionOpts, callback: ActorActionCallback) => void
+  }
+  register: () => Promise<RegistrationResponse>
+  destroy: () => Promise<any>
+}
+
 let uniqueDefaultSystem = 'spawn_system'
 let systemCreated = false
 
-const createSystem = (system: string = uniqueDefaultSystem) => {
+/**
+ * Creates the spawn system
+ * You need to call `register` after every actor and action has been registered and added.
+ * 
+ * Think of this as adding REST routes, its the same, you have to define all actions (routes) your actors are going to handle
+ * 
+ * `Limitation`: You can't create two systems instance in the same runtime
+ * 
+ * ## Example:
+ * ```
+    // builds system
+    const system = spawn.createSystem('spawn_system_example')
+
+    // builds the actor
+    const actor = system.buildActor({
+      name: 'user_actor_example',
+      stateType: UserState,
+      stateful: true
+    })
+
+    // adds a action handler to the actor
+    actor.addAction(
+      { name: 'setName', payloadType: ChangeUserName },
+      async (context: ActorContext<UserState>, message: ChangeUserName) => {
+        const response = ChangeUserNameResponse.create({
+          newName: message.newName,
+          status: ChangeUserNameStatus.OK
+        })
+
+        return Value.of<UserState, ChangeUserNameResponse>()
+          .state({ ...context.state, name: message.newName })
+          .response(ChangeUserNameResponse, response)
+      }
+    )
+
+    // finally register all systems
+    await system.register()
+
+    // to invoke you would do something like
+    const changeUserNameResponse = await spawn.invoke('user_actor_example', {
+      command: 'setName',
+      payload: payloadFor(ChangeUserName, { newName: 'new_user_name' }),
+      response: ChangeUserNameResponse
+    }) as ChangeUserNameResponse
+```
+ * 
+ * @param {string} system - System name, defaults to `spawn_system`
+ * @returns SpawnSystem
+ */
+const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
   if (systemCreated)
     throw new SpawnSystemRegisteredError('This API currently supports only one system per runtime.')
 
@@ -73,7 +131,7 @@ const createSystem = (system: string = uniqueDefaultSystem) => {
   const registeredCallbacks = new Map<string, ActorCallbackConnector>()
   let registered = false
 
-  startServer(registeredCallbacks)
+  const server = startServer(registeredCallbacks)
 
   return {
     /**
@@ -132,6 +190,17 @@ const createSystem = (system: string = uniqueDefaultSystem) => {
 
         return response
       })
+    },
+    destroy: async () => {
+      return new Promise((resolve, reject) => {
+        server.stop((err) => {
+          if (err) return reject()
+
+          registered = false
+          systemCreated = false
+          resolve(true)
+        })
+      })
     }
   }
 }
@@ -164,15 +233,19 @@ export type InvokeOpts = {
  * - async - (optional) Whether the command should be executed asynchronously
  * - pooled - (optional) Whether the command should be executed in a pooled actor
  * - metadata - (optional) Additional metadata to be passed to the command
- * - ref - (optional) A reference to the actor if you want to also spawn it during invocation
+ * - ref - (optional) A reference to the abstract actor if you want to also spawn it during invocation, not needing to call spawnActor previously
  * - scheduledTo - (optional) The scheduled date to be executed
  * - delay - (optional) The delay in ms this will be invoked
  */
-const invoke = async (actorName: string, invokeOpts: InvokeOpts) => {
+const invoke = async (actorName: string, invokeOpts: InvokeOpts): Promise<any | null> => {
   let async = invokeOpts.async || false
   let system = invokeOpts.system || uniqueDefaultSystem
   let pooled = invokeOpts.pooled || false
   let metadata = invokeOpts.metadata || {}
+
+  if (invokeOpts.ref) {
+    await spawnActor(actorName, { system, actorRef: invokeOpts.ref })
+  }
 
   const request = InvocationRequest.create({
     system: ActorSystem.create({ name: system }),
@@ -197,11 +270,36 @@ const invoke = async (actorName: string, invokeOpts: InvokeOpts) => {
   return null
 }
 
-// TODO: Spawn Actor
-const spawnActor = async () => {}
+export type SpawnActorOpts = {
+  actorRef: string
+  system?: string
+}
+
+/**
+ * Used to dinamically spawn abstract actors.
+ * This is kind of instances for a class, the actor being the "class" definition and the actorName of this input being the instanceId
+ *
+ * ## Example:
+ * ```
+ * spawnActor('abstractActor_id_01', { system: 'test', actorRef: 'abstractActor' })
+ * ```
+ *
+ * @param {string} actorName name of the actor (this is the instanceId that you want to use usually for a abstract actor)
+ * @param {SpawnActorOpts} opts
+ * @returns {Promise<SpawnResponse>} response
+ */
+const spawnActor = async (actorName: string, opts: SpawnActorOpts): Promise<SpawnResponse> => {
+  let system = opts.system || uniqueDefaultSystem
+
+  const request = SpawnRequest.create({
+    actors: [ActorId.create({ name: actorName, system, parent: opts.actorRef })]
+  })
+
+  return spawnActorRequest(request)
+}
 
 export const payloadFor = (type: MessageType<any>, value: any): PayloadRef => {
   return { ref: type, instance: type.create(value) }
 }
 
-export default { createSystem, invoke, payloadFor }
+export default { createSystem, invoke, spawnActor, payloadFor }

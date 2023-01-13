@@ -1,4 +1,4 @@
-import { Broadcast, Effect } from '../client-actor/context'
+import { Broadcast, Effect, Forward, Pipe } from '../client-actor/context'
 import { Actor, ActorId, ActorSystem } from '../protos/eigr/functions/protocol/actors/actor'
 import {
   Noop,
@@ -8,6 +8,10 @@ import {
 } from '../protos/eigr/functions/protocol/actors/protocol'
 import { Any } from '../protos/google/any'
 import { MessageType } from '@protobuf-ts/runtime'
+import {
+  Pipe as PipeProtocol,
+  Forward as ForwardProtocol
+} from '../protos/eigr/functions/protocol/actors/protocol'
 
 type OneofPayload =
   | { oneofKind: 'value'; value: Any }
@@ -85,6 +89,26 @@ export const buildSideEffects = (callerName: string, system: string, effects?: E
 
     return SideEffect.create({ request })
   })
+}
+
+export const buildRoutingWorkflow = (pipe?: Pipe, forward?: Forward) => {
+  let routingWorkflow: any = { oneofKind: undefined }
+
+  if (pipe) {
+    routingWorkflow = {
+      oneofKind: 'pipe',
+      pipe: { actor: pipe.actorName, commandName: pipe.command } as PipeProtocol
+    }
+  }
+
+  if (forward) {
+    routingWorkflow = {
+      oneofKind: 'forward',
+      forward: { actor: forward.actorName, commandName: forward.command } as ForwardProtocol
+    }
+  }
+
+  return routingWorkflow
 }
 
 export const parseScheduledTo = (delayMs?: number, scheduledTo?: Date): number | undefined => {

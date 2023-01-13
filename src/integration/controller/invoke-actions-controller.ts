@@ -9,7 +9,13 @@ import { ServerResponse, IncomingMessage } from 'node:http'
 import { sendResponse } from '../server'
 import { ActorCallbackConnector } from '../../spawn'
 import { Any } from '../../protos/google/any'
-import { buildBroadcast, buildPayload, buildSideEffects, unpack } from '../parsers'
+import {
+  buildBroadcast,
+  buildPayload,
+  buildRoutingWorkflow,
+  buildSideEffects,
+  unpack
+} from '../parsers'
 
 export const registerControllerHandler = (
   req: IncomingMessage,
@@ -20,7 +26,9 @@ export const registerControllerHandler = (
     const { currentContext, actor, payload, commandName, caller } =
       ActorInvocation.fromBinary(buffer)
 
-    const callbackData = actorCallbacks.get(`${actor?.system}${actor?.name}${commandName}`)
+    const callbackData = actorCallbacks.get(
+      `${actor?.system}${actor?.parent || actor?.name}${commandName}`
+    )
 
     if (!callbackData) {
       const resp = ActorInvocationResponse.create({
@@ -50,14 +58,6 @@ export const registerControllerHandler = (
     const value = await callback(context, payloadType.fromBinary(payloadToUnpack.value))
     const parsedValue = value.parse()
 
-    let routingWorkflow: any = { oneofKind: undefined }
-    if (parsedValue.pipe) {
-      routingWorkflow = { oneofKind: 'pipe', pipe: parsedValue.pipe }
-    }
-    if (parsedValue.forward) {
-      routingWorkflow = { oneofKind: 'forward', forward: parsedValue.forward }
-    }
-
     const response = ActorInvocationResponse.create({
       actorName: actor?.name,
       actorSystem: actor?.system,
@@ -71,7 +71,7 @@ export const registerControllerHandler = (
       workflow: {
         broadcast: buildBroadcast(parsedValue?.broadcast),
         effects: buildSideEffects(actor!.name, actor!.system, parsedValue.effects),
-        routing: routingWorkflow
+        routing: buildRoutingWorkflow(parsedValue?.pipe, parsedValue?.forward)
       }
     })
 

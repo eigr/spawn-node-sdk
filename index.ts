@@ -8,7 +8,8 @@ import spawn, {
   InvokeOpts,
   ActorCallbackConnector,
   payloadFor,
-  ActorActionOpts
+  ActorActionOpts,
+  SpawnSystem
 } from './src/spawn'
 
 export {
@@ -26,30 +27,7 @@ export {
   Pipe,
   Forward,
   ActorOpts,
-  IActorOpts
+  IActorOpts,
+  SpawnSystem
 }
 export default spawn
-
-// (async () => {
-//     const system = spawn.createSystem('systest4')
-
-//     const actor = system.buildActor({ name: 'ggg', stateType: UserState })
-
-//     const TestActionHandler: ActorActionCallback<UserState, ChangeUserNameResponse> = async (ctx, payload: ChangeUserName) => {
-//       const response = ChangeUserNameResponse.create({ newName: payload.newName, status: ChangeUserNameStatus.OK })
-
-//       return Value.of<UserState, ChangeUserNameResponse>()
-//         .state({ name: 'aqui é state', nickname: 'jao' })
-//         .response(payloadFor(ChangeUserNameResponse, response))
-//     }
-
-//     actor.addAction({ name: 'tesh', payloadType: ChangeUserName }, TestActionHandler)
-
-//     await system.register()
-
-//     var opts = { command: 'tesh', response: ChangeUserNameResponse, payload: payloadFor(ChangeUserName, { newName: "ué" })}
-//     var invokeResp = await spawn.invoke('ggg', opts)
-
-//     var opts2 = { command: 'GetState', response: UserState }
-//     var invokeResp2 = await spawn.invoke('ggg', opts2)
-// })();

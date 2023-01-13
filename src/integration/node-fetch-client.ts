@@ -4,9 +4,11 @@ import {
   RegistrationRequest,
   RegistrationResponse,
   Status,
-  RequestStatus
+  RequestStatus,
+  SpawnRequest,
+  SpawnResponse
 } from '../protos/eigr/functions/protocol/actors/protocol'
-import { SpawnInvocationError, SpawnRegisterError } from './errors'
+import { SpawnActorError, SpawnInvocationError, SpawnRegisterError } from './errors'
 import fetch from 'node-fetch'
 
 export async function registerRequest(
@@ -55,6 +57,29 @@ export async function invokeRequest(request: InvocationRequest): Promise<Invocat
 
   if (responseStatus?.status && responseStatus?.status !== Status.OK) {
     throw new SpawnInvocationError(responseStatus.message, responseStatus.status)
+  }
+
+  return response
+}
+
+export async function spawnActorRequest(request: SpawnRequest): Promise<SpawnResponse> {
+  const body = SpawnRequest.toBinary(request)
+  const url = process.env.SPAWN_PROXY_URL || 'http://localhost:9006'
+
+  const res = await fetch(`${url}/api/v1/system/${request.actors[0]?.system}/actors/spawn`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/octet-stream',
+      'Content-Type': 'application/octet-stream'
+    },
+    body
+  })
+
+  const response = SpawnResponse.fromBinary(await res.buffer())
+  const responseStatus = response.status as RequestStatus
+
+  if (responseStatus?.status && responseStatus?.status !== Status.OK) {
+    throw new SpawnActorError(responseStatus.message)
   }
 
   return response

@@ -1,5 +1,7 @@
 import { Broadcast, Effect, Forward, Pipe } from './context'
 import { PayloadRef } from '../integration/parsers'
+import { MessageType } from '@protobuf-ts/runtime'
+import { payloadFor } from '../spawn'
 
 export class Value<T extends object = object, K extends object = object> {
   private _state?: T
@@ -19,8 +21,13 @@ export class Value<T extends object = object, K extends object = object> {
     return this
   }
 
-  response(response: PayloadRef<K>) {
-    this._response = response
+  response(ref: MessageType<K> | PayloadRef<K>, instance?: K) {
+    if ((ref as PayloadRef<K>)?.ref === undefined) {
+      this._response = payloadFor(ref as MessageType<K>, instance)
+    } else {
+      this._response = ref as PayloadRef<K>
+    }
+
     return this
   }
 

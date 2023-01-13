@@ -11,6 +11,10 @@ export class SpawnInvocationError extends Error {
   }
 }
 
+export class SpawnActorError extends Error {
+  name: string = 'SpawnActorError'
+}
+
 export class SpawnInvocationWrongOutput extends Error {
   name: string = 'SpawnInvocationWrongOutput'
 }
