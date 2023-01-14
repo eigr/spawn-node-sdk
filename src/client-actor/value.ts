@@ -1,4 +1,4 @@
-import { Broadcast, Effect, Forward, Pipe } from './context'
+import { Broadcast, Effect, Forward, Pipe } from './workflows'
 import { PayloadRef } from '../integration/parsers'
 import { MessageType } from '@protobuf-ts/runtime'
 import { payloadFor } from '../spawn'

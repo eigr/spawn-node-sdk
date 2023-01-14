@@ -14,7 +14,7 @@ import {
   SpawnRequest,
   SpawnResponse
 } from './protos/eigr/functions/protocol/actors/protocol'
-import { ActorContext } from './client-actor/context'
+import { ActorContext } from './client-actor/workflows'
 import { SpawnSystemRegisteredError } from './integration/errors'
 import { ActorOpts, buildActorForSystem, defaultActorOpts } from './client-actor/definitions'
 import {

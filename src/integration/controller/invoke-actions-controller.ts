@@ -4,7 +4,7 @@ import {
   Context,
   Noop
 } from '../../protos/eigr/functions/protocol/actors/protocol'
-import { ActorContext } from '../../client-actor/context'
+import { ActorContext } from '../../client-actor/workflows'
 import { ServerResponse, IncomingMessage } from 'node:http'
 import { sendResponse } from '../server'
 import { ActorCallbackConnector } from '../../spawn'
@@ -26,9 +26,11 @@ export const registerControllerHandler = (
     const { currentContext, actor, payload, commandName, caller } =
       ActorInvocation.fromBinary(buffer)
 
-    const callbackData = actorCallbacks.get(
-      `${actor?.system}${actor?.parent || actor?.name}${commandName}`
-    )
+    let callbackData = actorCallbacks.get(`${actor?.system}${actor?.name}${commandName}`)
+
+    if (!callbackData) {
+      callbackData = actorCallbacks.get(`${actor?.system}${actor?.parent}${commandName}`)
+    }
 
     if (!callbackData) {
       const resp = ActorInvocationResponse.create({

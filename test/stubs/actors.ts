@@ -4,9 +4,9 @@ import {
   ChangeUserNameResponse,
   ChangeUserNameStatus
 } from '../protos/user_test'
-import { ActorContext } from '../../src/client-actor/context'
+import { ActorContext } from '../../src/client-actor/workflows'
 import { Value } from '../../src/client-actor/value'
-import { SpawnSystem } from '../../src/spawn'
+import { payloadFor, SpawnSystem } from '../../src/spawn'
 import { Noop } from '../../src/protos/eigr/functions/protocol/actors/protocol'
 import { Kind } from '../../src/protos/eigr/functions/protocol/actors/actor'
 
@@ -69,6 +69,36 @@ export const createUserActor = (system: SpawnSystem) => {
   )
 
   actor.addAction(
+    { name: 'effectsTest', payloadType: ChangeUserName },
+    async (context: ActorContext<UserState>) => {
+      return Value.of()
+        .state({ name: 'effectsInitial' })
+        .effects([
+          {
+            actorName: context.self.name,
+            command: 'afterEffect',
+            payload: payloadFor(Noop, {}),
+            scheduledTo: 1_000
+          }
+        ])
+    }
+  )
+
+  actor.addAction({ name: 'broadcastTest', payloadType: Noop }, async () => {
+    return Value.of()
+      .state({ name: 'broadcastInitial' })
+      .broadcast({
+        channel: 'broadcast_test',
+        command: 'broadcastReceiver',
+        payload: payloadFor(Noop, {})
+      })
+  })
+
+  actor.addAction({ name: 'afterEffect', payloadType: Noop }, async () =>
+    Value.of().state({ name: 'afterEffect' })
+  )
+
+  actor.addAction(
     { name: 'setName', payloadType: ChangeUserName },
     async (context: ActorContext<UserState>, message: ChangeUserName) => {
       const response = ChangeUserNameResponse.create({
@@ -90,9 +120,14 @@ export const createRandomActor = (system: SpawnSystem, actorName: string) => {
     name: actorName,
     stateType: UserState,
     stateful: true,
+    channel: 'broadcast_test',
     snapshotTimeout: 10_000n,
     deactivatedTimeout: 500_000n
   })
+
+  actor.addAction({ name: 'broadcastReceiver', payloadType: Noop }, async () =>
+    Value.of().state({ name: 'afterBroadcast' })
+  )
 
   return actor
 }
@@ -118,4 +153,29 @@ export const createAbstractActor = (system: SpawnSystem) => {
         .response(ChangeUserNameResponse, response)
     }
   )
+
+  return actor
+}
+
+export const createPooledActor = (system: SpawnSystem) => {
+  const actor = system.buildActor({
+    name: 'pooledActorTest',
+    kind: Kind.POOLED,
+    minPoolSize: 1,
+    maxPoolSize: 5
+  })
+
+  actor.addAction(
+    { name: 'setName', payloadType: ChangeUserName },
+    async (_ctx, message: ChangeUserName) => {
+      const response = ChangeUserNameResponse.create({
+        newName: `${message.newName}-set`,
+        status: ChangeUserNameStatus.OK
+      })
+
+      return Value.of<never, ChangeUserNameResponse>().response(ChangeUserNameResponse, response)
+    }
+  )
+
+  return actor
 }

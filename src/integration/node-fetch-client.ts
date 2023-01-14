@@ -11,13 +11,14 @@ import {
 import { SpawnActorError, SpawnInvocationError, SpawnRegisterError } from './errors'
 import fetch from 'node-fetch'
 
+const PROXY_URL = process.env.SPAWN_PROXY_URL || 'http://localhost:9001'
+
 export async function registerRequest(
   registration: RegistrationRequest
 ): Promise<RegistrationResponse> {
   const body = RegistrationRequest.toBinary(registration)
-  const url = process.env.SPAWN_PROXY_URL || 'http://localhost:9006'
 
-  const res = await fetch(`${url}/api/v1/system`, {
+  const res = await fetch(`${PROXY_URL}/api/v1/system`, {
     method: 'POST',
     headers: {
       Accept: 'application/octet-stream',
@@ -38,10 +39,9 @@ export async function registerRequest(
 
 export async function invokeRequest(request: InvocationRequest): Promise<InvocationResponse> {
   const body = InvocationRequest.toBinary(request)
-  const url = process.env.SPAWN_PROXY_URL || 'http://localhost:9006'
 
   const res = await fetch(
-    `${url}/api/v1/system/${request.system?.name}/actors/${request.actor?.id?.name}/invoke`,
+    `${PROXY_URL}/api/v1/system/${request.system?.name}/actors/${request.actor?.id?.name}/invoke`,
     {
       method: 'POST',
       headers: {
@@ -64,9 +64,8 @@ export async function invokeRequest(request: InvocationRequest): Promise<Invocat
 
 export async function spawnActorRequest(request: SpawnRequest): Promise<SpawnResponse> {
   const body = SpawnRequest.toBinary(request)
-  const url = process.env.SPAWN_PROXY_URL || 'http://localhost:9006'
 
-  const res = await fetch(`${url}/api/v1/system/${request.actors[0]?.system}/actors/spawn`, {
+  const res = await fetch(`${PROXY_URL}/api/v1/system/${request.actors[0]?.system}/actors/spawn`, {
     method: 'POST',
     headers: {
       Accept: 'application/octet-stream',

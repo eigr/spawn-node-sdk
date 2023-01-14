@@ -1,4 +1,4 @@
-import { Broadcast, Effect, Forward, Pipe } from '../client-actor/context'
+import { Broadcast, Effect, Forward, Pipe } from '../client-actor/workflows'
 import { Actor, ActorId, ActorSystem } from '../protos/eigr/functions/protocol/actors/actor'
 import {
   Noop,
@@ -84,7 +84,9 @@ export const buildSideEffects = (callerName: string, system: string, effects?: E
       commandName: effect.command,
       async: true,
       caller: ActorId.create({ name: callerName, system }),
-      scheduledTo: scheduledToBigInt(effect.scheduledTo)
+      scheduledTo: scheduledToBigInt(
+        parseScheduledTo(effect.scheduledTo as number, effect.scheduledTo as Date)
+      )
     })
 
     return SideEffect.create({ request })
