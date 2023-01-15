@@ -40,7 +40,7 @@ export const createUserActor = (system: SpawnSystem) => {
   actor.addAction(
     { name: 'noreplyChangeName', payloadType: Noop },
     async (context: ActorContext<UserState>) => {
-      return Value.of<UserState>().state({ ...context.state, name: 'noreply_name_ok' })
+      return Value.of<UserState>().state({ ...context.state, name: 'noreplyNameOk' })
     }
   )
 

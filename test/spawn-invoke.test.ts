@@ -80,7 +80,11 @@ describe('testing invoke', () => {
 
   test('invoking noreply async function and changing internal state with it', async () => {
     const command = 'noreplyChangeName'
-    const invokeAsync = await spawn.invoke('userActorTest', { command, system: 'spawn_sys_test' })
+    const invokeAsync = await spawn.invoke('userActorTest', {
+      command,
+      async: true,
+      system: 'spawn_sys_test'
+    })
     const stateChanged = await spawn.invoke('userActorTest', {
       system: 'spawn_sys_test',
       command: 'get',
@@ -88,6 +92,6 @@ describe('testing invoke', () => {
     })
 
     expect(invokeAsync).toBeNull()
-    expect(stateChanged.name).toBe('noreply_name_ok')
+    expect(stateChanged.name).toBe('noreplyNameOk')
   })
 })
