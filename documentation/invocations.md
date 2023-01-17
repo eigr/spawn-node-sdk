@@ -3,7 +3,7 @@
 You can invoke actor functions defining:
 
 ```TS
-import spawn, { payloadFor } from '@eigr/spawn'
+import spawn, { payloadFor } from '@eigr/spawn-sdk'
 
 /**
  * InvokeOpts fields:

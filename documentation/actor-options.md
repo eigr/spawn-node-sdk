@@ -7,7 +7,7 @@ This is an example of what kind of Actors you can create with Spawn
 In this example we are creating an actor in a Singleton way, that is, it is a known actor at compile time.
 
 ```TS
-import spawn, { ActorContext, Kind, Value } from '@eigr/spawn'
+import spawn, { ActorContext, Kind, Value } from '@eigr/spawn-sdk'
 import { UserState, ChangeUserNamePayload, ChangeUserNameResponse, ChangeUserNameStatus } from 'src/protos/examples/user_example'
 
 const system = spawn.createSystem()
@@ -39,7 +39,7 @@ system.register()
 It can be invoked with:
 
 ```TS
-import spawn, { payloadFor } from '@eigr/spawn'
+import spawn, { payloadFor } from '@eigr/spawn-sdk'
 import { ChangeUserNamePayload, ChangeUserNameResponse } from 'src/protos/examples/user_example'
 
 spawn.invoke('singletonActorExample', {
@@ -55,7 +55,7 @@ spawn.invoke('singletonActorExample', {
 We can also create Unnamed Dynamic/Lazy actors, that is, despite having its abstract behavior defined at compile time, a Lazy actor will only have a concrete instance when it is associated with an identifier/name at runtime. Below follows the same previous actor being defined as abstract.
 
 ```TS
-import spawn, { ActorContext, Kind, Value } from '@eigr/spawn'
+import spawn, { ActorContext, Kind, Value } from '@eigr/spawn-sdk'
 import { UserState, ChangeUserNamePayload, ChangeUserNameResponse, ChangeUserNameStatus } from 'src/protos/examples/user_example'
 
 const system = spawn.createSystem()
@@ -84,7 +84,7 @@ system.register()
 It can be invoked with:
 
 ```TS
-import spawn, { payloadFor } from '@eigr/spawn'
+import spawn, { payloadFor } from '@eigr/spawn-sdk'
 import { ChangeUserNamePayload, ChangeUserNameResponse } from 'src/protos/examples/user_example'
 
 spawn.invoke('some-user-id-01', {
@@ -104,7 +104,7 @@ And we need to reference the original name in the invocation or instantiate it b
 Sometimes we want a particular actor to be able to serve requests concurrently, however actors will always serve one request at a time using buffering mechanisms to receive requests in their mailbox and serve each request one by one. So to get around this behaviour you can configure your Actor as a Pooled Actor, this way the system will generate a pool of actors to meet certain requests. See an example below:
 
 ```TS
-import spawn, { ActorContext, Kind, Value, Noop } from '@eigr/spawn'
+import spawn, { ActorContext, Kind, Value, Noop } from '@eigr/spawn-sdk'
 
 const system = spawn.createSystem()
 
@@ -132,7 +132,7 @@ system.register()
 It can be invoked with:
 
 ```TS
-import spawn, { payloadFor } from '@eigr/spawn'
+import spawn, { payloadFor } from '@eigr/spawn-sdk'
 
 spawn.invoke('pooledActorExample', {
   command: 'handleSomething',

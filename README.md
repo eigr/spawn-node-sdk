@@ -85,7 +85,7 @@ With this, it should generate a file at `src/protos/examples/user_example.ts`, w
 Now, in your `index.ts` file declare:
 
 ```TS
-import spawn, { ActorContext, Value } from '@eigr/spawn'
+import spawn, { ActorContext, Value } from '@eigr/spawn-sdk'
 import { UserState, ChangeUserNamePayload, ChangeUserNameStatus } from 'src/protos/examples/user_example'
 
 const system = spawn.createSystem('SpawnSystemName')
@@ -116,7 +116,7 @@ system.register()
 With this configured, you can invoke this actor anywhere you want with:
 
 ```TS
-import spawn, { payloadFor } from '@eigr/spawn'
+import spawn, { payloadFor } from '@eigr/spawn-sdk'
 import { UserState, ChangeUserNamePayload, ChangeUserNameResponse } from 'src/protos/examples/user_example'
 
 (async () => {
