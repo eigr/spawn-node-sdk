@@ -23,10 +23,9 @@ export function sendResponse(status: number, res: ServerResponse, resp: any = nu
   res.end()
 }
 
-export function startServer(
-  actorCallbacks: Map<string, ActorCallbackConnector>,
-  port = process.env.SPAWN_ACTION_PORT || 8090
-) {
+const getActionPort = () => process.env.SPAWN_ACTION_PORT || 8090
+
+export function startServer(actorCallbacks: Map<string, ActorCallbackConnector>) {
   const server = stoppable(
     http.createServer((req: IncomingMessage, res: ServerResponse) => {
       if (req.url === '/api/v1/actors/actions') {
@@ -40,8 +39,8 @@ export function startServer(
     process.env.NODE_ENV === 'prod' ? Infinity : 1_000
   )
 
-  server.listen(port, () => {
-    console.log(`[SpawnSystem] Server listening on :${port}`)
+  server.listen(getActionPort(), () => {
+    console.log(`[SpawnSystem] Server listening on :${getActionPort()}`)
   })
 
   return server
