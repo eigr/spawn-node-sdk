@@ -7,7 +7,7 @@
 Currently, this framework has a direct dependency of [@protobuf-ts](https://github.com/timostamm/protobuf-ts)
 
 ```
-npm install spawn-sdk
+yarn add @eigr/spawn-sdk
 ```
 
 ## **Getting Started**

@@ -1,11 +1,21 @@
 {
-  "name": "spawn-nodejs-sdk",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "name": "@eigr/spawn-sdk",
+  "version": "0.5.0",
+  "description": "Spawn Actor model framework implementation for NodeJS",
+  "main": "_build/index.js",
+  "types": "_build/index.d.ts",
+  "scope": "@eigr",
+  "private": false,
   "engines": {
     "node": ">=14.0.0"
   },
+  "files": [
+    "_build",
+    "package.json",
+    "yarn.lock",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "tsc": "tsc",
     "proto-gen": "protoc --ts_out ./src/protos/ --proto_path protos protos/**/*.proto",
