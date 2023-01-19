@@ -12,11 +12,12 @@ import { Kind } from '../../src/protos/eigr/functions/protocol/actors/actor'
 
 export const createUserActor = (system: SpawnSystem) => {
   const actor = system.buildActor({
-    name: 'userActorTest',
+    name: 'MockUserActor',
     stateType: UserState,
     stateful: true,
-    snapshotTimeout: 10_000n,
-    deactivatedTimeout: 500_000n
+    snapshotTimeout: 5_000n,
+    deactivatedTimeout: 15_000n,
+    tags: { initial: 'initialTags' }
   })
 
   const actorTransformer = system.buildActor({
@@ -43,6 +44,10 @@ export const createUserActor = (system: SpawnSystem) => {
       return Value.of<UserState>().state({ ...context.state, name: 'noreplyNameOk' })
     }
   )
+
+  actor.addAction({ name: 'init', payloadType: Noop }, async (context: ActorContext<UserState>) => {
+    return Value.of().tags({ ...context.tags, init: 'initTag' })
+  })
 
   actor.addAction(
     { name: 'pipeTest', payloadType: ChangeUserName },
@@ -109,6 +114,38 @@ export const createUserActor = (system: SpawnSystem) => {
       return Value.of<UserState, ChangeUserNameResponse>()
         .state({ ...context.state, name: message.newName })
         .response(ChangeUserNameResponse, response)
+    }
+  )
+
+  actor.addAction(
+    { name: 'setNameMetadata', payloadType: ChangeUserName },
+    async (context: ActorContext<UserState>) => {
+      const response = ChangeUserNameResponse.create({
+        newName: context.metadata.metakey,
+        status: ChangeUserNameStatus.OK
+      })
+
+      const newTags = { ...context.metadata, newKey: 'newKeyMeta' }
+
+      return Value.of<UserState, ChangeUserNameResponse>()
+        .state({ ...context.state, name: context.metadata.metakey })
+        .tags({ ...context.tags, ...newTags })
+        .response(ChangeUserNameResponse, response)
+    }
+  )
+
+  actor.addAction(
+    { name: 'getTagsName', payloadType: Noop },
+    async (context: ActorContext<UserState>) => {
+      const response = ChangeUserNameResponse.create({
+        newName: `${context.tags?.metakey}-${context.tags?.initial}-${context.tags?.init}`,
+        status: ChangeUserNameStatus.OK
+      })
+
+      return Value.of<UserState, ChangeUserNameResponse>().response(
+        ChangeUserNameResponse,
+        response
+      )
     }
   )
 

@@ -23,7 +23,7 @@ export type IActorOpts = {
   snapshotTimeout?: bigint
   deactivatedTimeout?: bigint
   channel?: string
-  metadata?: { [key: string]: string }
+  tags?: { [key: string]: string }
 }
 
 export type PooledActorOpts = IActorOpts & {
@@ -44,7 +44,7 @@ export const defaultActorOpts = {
 
 export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
   const state: ActorState = {
-    tags: {},
+    tags: opts.tags || {},
     state: Any.pack(opts.stateType?.create() || Noop.create(), opts.stateType || Noop)
   }
 
@@ -70,7 +70,7 @@ export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
     }
   }
 
-  const metadata: Metadata = { channelGroup: opts.channel!, tags: opts.metadata || {} }
+  const metadata: Metadata = { channelGroup: opts.channel!, tags: {} }
   const id = { name: opts.name, system } as ActorId
 
   if (opts.kind === Kind.ABSTRACT) {

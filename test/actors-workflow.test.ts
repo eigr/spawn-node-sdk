@@ -14,7 +14,7 @@ describe('testing workflows', () => {
   let system: SpawnSystem
 
   beforeAll(async () => {
-    system = spawn.createSystem('spawn_sys_test')
+    system = spawn.createSystem('SpawnSysTest')
 
     createUserActor(system)
     createRandomActor(system, randomActorName)
@@ -30,8 +30,8 @@ describe('testing workflows', () => {
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'newNameInput' }))
     const command = 'pipeTest'
 
-    const newNameResponse = await spawn.invoke('userActorTest', {
-      system: 'spawn_sys_test',
+    const newNameResponse = await spawn.invoke('MockUserActor', {
+      system: 'SpawnSysTest',
       command,
       payload,
       response: ChangeUserNameResponse
@@ -39,8 +39,8 @@ describe('testing workflows', () => {
 
     expect(newNameResponse.newName).toBe('transformed newNameInputInternal')
 
-    const userState = await spawn.invoke(`userActorTest`, {
-      system: 'spawn_sys_test',
+    const userState = await spawn.invoke(`MockUserActor`, {
+      system: 'SpawnSysTest',
       command: 'getState',
       response: UserState
     })
@@ -52,8 +52,8 @@ describe('testing workflows', () => {
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'newNameForward' }))
     const command = 'forwardTest'
 
-    const newNameResponse = await spawn.invoke('userActorTest', {
-      system: 'spawn_sys_test',
+    const newNameResponse = await spawn.invoke('MockUserActor', {
+      system: 'SpawnSysTest',
       command,
       payload,
       response: ChangeUserNameResponse
@@ -61,8 +61,8 @@ describe('testing workflows', () => {
 
     expect(newNameResponse.newName).toBe('transformed newNameForward')
 
-    const userState = await spawn.invoke(`userActorTest`, {
-      system: 'spawn_sys_test',
+    const userState = await spawn.invoke(`MockUserActor`, {
+      system: 'SpawnSysTest',
       command: 'getState',
       response: UserState
     })
@@ -74,8 +74,8 @@ describe('testing workflows', () => {
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'newNameForward' }))
     const command = 'effectsTest'
 
-    await spawn.invoke('userActorTest', {
-      system: 'spawn_sys_test',
+    await spawn.invoke('MockUserActor', {
+      system: 'SpawnSysTest',
       command,
       payload,
       response: ChangeUserNameResponse
@@ -83,8 +83,8 @@ describe('testing workflows', () => {
 
     await timeout(1_500)
 
-    const userState = await spawn.invoke(`userActorTest`, {
-      system: 'spawn_sys_test',
+    const userState = await spawn.invoke(`MockUserActor`, {
+      system: 'SpawnSysTest',
       command: 'getState',
       response: UserState
     })
@@ -95,15 +95,15 @@ describe('testing workflows', () => {
   test('calling broadcast and seeing its effect in another actor', async () => {
     const command = 'broadcastTest'
 
-    await spawn.invoke('userActorTest', {
-      system: 'spawn_sys_test',
+    await spawn.invoke('MockUserActor', {
+      system: 'SpawnSysTest',
       command
     })
 
     await timeout(100)
 
     const userState = await spawn.invoke(randomActorName, {
-      system: 'spawn_sys_test',
+      system: 'SpawnSysTest',
       command: 'getState',
       response: UserState
     })

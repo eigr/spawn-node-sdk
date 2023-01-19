@@ -10,7 +10,7 @@ export class Value<T extends object = object, K extends object = object> {
   private _pipe?: Pipe
   private _forward?: Forward
   private _effects?: Effect[]
-  private _metadata?: { [key: string]: string }
+  private _tags?: { [key: string]: string }
 
   static of<T extends object = object, K extends object = object>() {
     return new Value<T, K>()
@@ -51,8 +51,8 @@ export class Value<T extends object = object, K extends object = object> {
     return this
   }
 
-  metadata(metadata: { [key: string]: string }) {
-    this._metadata = metadata
+  tags(tags: { [key: string]: string }) {
+    this._tags = tags
     return this
   }
 
@@ -64,7 +64,7 @@ export class Value<T extends object = object, K extends object = object> {
       pipe: this._pipe,
       forward: this._forward,
       effects: this._effects,
-      metadata: this._metadata
+      tags: this._tags
     }
   }
 }

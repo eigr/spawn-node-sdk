@@ -6,7 +6,7 @@ describe('testing spawn abstract actor', () => {
   let system: SpawnSystem
 
   beforeAll(async () => {
-    system = spawn.createSystem('spawn_sys_test')
+    system = spawn.createSystem('SpawnSysTest')
 
     createAbstractActor(system)
 
@@ -19,7 +19,7 @@ describe('testing spawn abstract actor', () => {
 
   test('settting new name for a abstract actor', async () => {
     await spawn.spawnActor('abstractActorTest_01', {
-      system: 'spawn_sys_test',
+      system: 'SpawnSysTest',
       actorRef: 'abstractActorTest'
     })
 
@@ -35,7 +35,7 @@ describe('testing spawn abstract actor', () => {
       command,
       payload,
       response: ChangeUserNameResponse,
-      system: 'spawn_sys_test'
+      system: 'SpawnSysTest'
     })
 
     expect(newNameResponse.newName).toBe(expected.newName)
@@ -56,7 +56,7 @@ describe('testing spawn abstract actor', () => {
       payload,
       response: ChangeUserNameResponse,
       ref: 'abstractActorTest',
-      system: 'spawn_sys_test'
+      system: 'SpawnSysTest'
     })
 
     expect(newNameResponse.newName).toBe(expected.newName)
