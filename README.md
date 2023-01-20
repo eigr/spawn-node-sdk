@@ -24,7 +24,7 @@ version: "3.8"
 
 services:
   spawn-proxy:
-    image: eigr/spawn-proxy:0.5.0-rc.9
+    image: eigr/spawn-proxy:0.5.0-rc.12
     restart: always
     environment:
       PROXY_APP_NAME: spawn
