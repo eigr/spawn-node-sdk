@@ -6,7 +6,7 @@ describe('testing spawn pooled actor', () => {
   let system: SpawnSystem
 
   beforeAll(async () => {
-    system = spawn.createSystem('spawn_sys_test')
+    system = spawn.createSystem('SpawnSysTest')
 
     createPooledActor(system)
 
@@ -30,7 +30,7 @@ describe('testing spawn pooled actor', () => {
       command,
       payload,
       response: ChangeUserNameResponse,
-      system: 'spawn_sys_test'
+      system: 'SpawnSysTest'
     })
 
     expect(newNameResponse.newName).toBe(expected.newName)

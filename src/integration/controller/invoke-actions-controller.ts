@@ -49,7 +49,8 @@ export const registerControllerHandler = (
       state: state || Noop.create(),
       caller: currentContext!.caller!,
       self: currentContext!.self!,
-      metadata: currentContext!.metadata!
+      metadata: currentContext!.metadata!,
+      tags: currentContext!.tags!
     }
 
     let payloadToUnpack = Any.create(Noop.create())
@@ -66,8 +67,9 @@ export const registerControllerHandler = (
       updatedContext: Context.create({
         caller: caller,
         self: actor,
-        metadata: parsedValue.metadata || currentContext?.metadata,
-        state: Any.pack(parsedValue.state, stateType)
+        metadata: currentContext?.metadata,
+        tags: parsedValue.tags || currentContext!.tags || {},
+        state: parsedValue.state ? Any.pack(parsedValue.state, stateType) : currentContext!.state
       }),
       payload: buildPayload(parsedValue.value),
       workflow: {

@@ -6,6 +6,7 @@ export type ActorContext<T> = {
   caller: ActorId
   self: ActorId
   metadata: { [key: string]: string }
+  tags: { [key: string]: string }
 }
 
 export type Broadcast = {
