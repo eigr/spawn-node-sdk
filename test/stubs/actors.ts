@@ -196,10 +196,11 @@ export const createAbstractActor = (system: SpawnSystem) => {
 
 export const createPooledActor = (system: SpawnSystem) => {
   const actor = system.buildActor({
-    name: 'pooledActorTest',
+    name: 'pooledActorExample',
     kind: Kind.POOLED,
-    minPoolSize: 1,
-    maxPoolSize: 5
+    stateful: false,
+    minPoolSize: 10,
+    maxPoolSize: 15
   })
 
   actor.addAction(

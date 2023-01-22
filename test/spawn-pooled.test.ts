@@ -26,9 +26,10 @@ describe('testing spawn pooled actor', () => {
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'namePooledCall' }))
     const command = 'setName'
 
-    const newNameResponse = await spawn.invoke('pooledActorTest', {
+    const newNameResponse = await spawn.invoke('pooledActorExample', {
       command,
       payload,
+      pooled: true,
       response: ChangeUserNameResponse,
       system: 'SpawnSysTest'
     })
