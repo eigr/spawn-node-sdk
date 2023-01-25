@@ -11,7 +11,8 @@ import {
 import { SpawnActorError, SpawnInvocationError, SpawnRegisterError } from './errors'
 import fetch from 'node-fetch'
 
-const getProxyUrl = () => process.env.SPAWN_PROXY_URL || 'http://localhost:9001'
+const getProxyUrl = () =>
+  `http://${process.env.PROXY_HTTP_HOST || 'localhost'}:${process.env.PROXY_HTTP_PORT || 9001}`
 
 export async function registerRequest(
   registration: RegistrationRequest

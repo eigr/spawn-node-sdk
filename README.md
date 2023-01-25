@@ -38,17 +38,20 @@ services:
       SPAWN_STATESTORE_KEY: 3Jnb0hZiHIzHTOih7t2cTEPEpY98Tu1wvQkPfq/XwqE=
       USER_FUNCTION_HOST: 0.0.0.0 # Your NodeJS runtime host
       USER_FUNCTION_PORT: 8090 # Your NodeJS runtime exposed port
-    # network_mode: host # only use this if you're running your nodejs locally
+    # network_mode: host # only uncomment this if you're running your nodejs locally in Linux, check note below for Windows
     ports:
       - "9001:9001"
 ```
 
-Set two env variables in your NodeJS runtime:
+> **NOTE:** `Windows w/ WSL2` - If you want to use docker for spawn-proxy and local host for your NodeJS check this article https://www.beyondjava.net/docker-wsl-network
+
+
+Set the following ENV variables for your NodeJS runtime (following .env.example)
 
 ```bash
-SPAWN_PROXY_URL=http://localhost:9001 # This is the actual address of the spawn proxy service
-
-SPAWN_ACTION_PORT=8090 # This is the port that your service will expose automatically to communicate with Spawn
+PROXY_HTTP_PORT=9001
+PROXY_HTTP_HOST=localhost
+USER_FUNCTION_PORT=8090
 ```
 
 Define a protobuf file (lets save this at `protos/examples/user_example.proto`)
@@ -154,5 +157,6 @@ You can check [test folder](./test) to see some examples
 
 ## **Environment variables:**
 
-- `SPAWN_PROXY_URL` This is the actual address of the spawn proxy service
-- `SPAWN_ACTION_PORT` This is the port that your service will expose to communicate with Spawn
+- `PROXY_HTTP_PORT` This is the port of spawn proxy service
+- `PROXY_HTTP_HOST` This is the host of spawn proxy service
+- `USER_FUNCTION_PORT` This is the port that your service will expose to communicate with Spawn

@@ -23,7 +23,7 @@ export function sendResponse(status: number, res: ServerResponse, resp: any = nu
   res.end()
 }
 
-const getActionPort = () => process.env.SPAWN_ACTION_PORT || 8090
+const getActionPort = () => process.env.USER_FUNCTION_PORT || 8090
 
 export function startServer(actorCallbacks: Map<string, ActorCallbackConnector>) {
   const server = stoppable(
