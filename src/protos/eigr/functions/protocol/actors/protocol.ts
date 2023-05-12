@@ -68,6 +68,18 @@ export interface Context {
  */
 export interface Noop {}
 /**
+ * JSON is an alternative that some SDKs can opt in
+ * it will bypass any type validation in spawn actors state / payloads
+ *
+ * @generated from protobuf message eigr.functions.protocol.JSONType
+ */
+export interface JSONType {
+  /**
+   * @generated from protobuf field: string content = 1;
+   */
+  content: string
+}
+/**
  * @generated from protobuf message eigr.functions.protocol.RegistrationRequest
  */
 export interface RegistrationRequest {
@@ -798,6 +810,68 @@ class Noop$Type extends MessageType<Noop> {
  * @generated MessageType for protobuf message eigr.functions.protocol.Noop
  */
 export const Noop = new Noop$Type()
+// @generated message type with reflection information, may provide speed optimized methods
+class JSONType$Type extends MessageType<JSONType> {
+  constructor() {
+    super('eigr.functions.protocol.JSONType', [
+      { no: 1, name: 'content', kind: 'scalar', T: 9 /*ScalarType.STRING*/ }
+    ])
+  }
+  create(value?: PartialMessage<JSONType>): JSONType {
+    const message = { content: '' }
+    globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this })
+    if (value !== undefined) reflectionMergePartial<JSONType>(this, message, value)
+    return message
+  }
+  internalBinaryRead(
+    reader: IBinaryReader,
+    length: number,
+    options: BinaryReadOptions,
+    target?: JSONType
+  ): JSONType {
+    let message = target ?? this.create(),
+      end = reader.pos + length
+    while (reader.pos < end) {
+      let [fieldNo, wireType] = reader.tag()
+      switch (fieldNo) {
+        case /* string content */ 1:
+          message.content = reader.string()
+          break
+        default:
+          let u = options.readUnknownField
+          if (u === 'throw')
+            throw new globalThis.Error(
+              `Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`
+            )
+          let d = reader.skip(wireType)
+          if (u !== false)
+            (u === true ? UnknownFieldHandler.onRead : u)(
+              this.typeName,
+              message,
+              fieldNo,
+              wireType,
+              d
+            )
+      }
+    }
+    return message
+  }
+  internalBinaryWrite(
+    message: JSONType,
+    writer: IBinaryWriter,
+    options: BinaryWriteOptions
+  ): IBinaryWriter {
+    /* string content = 1; */
+    if (message.content !== '') writer.tag(1, WireType.LengthDelimited).string(message.content)
+    let u = options.writeUnknownFields
+    if (u !== false) (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer)
+    return writer
+  }
+}
+/**
+ * @generated MessageType for protobuf message eigr.functions.protocol.JSONType
+ */
+export const JSONType = new JSONType$Type()
 // @generated message type with reflection information, may provide speed optimized methods
 class RegistrationRequest$Type extends MessageType<RegistrationRequest> {
   constructor() {

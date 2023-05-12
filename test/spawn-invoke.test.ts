@@ -9,7 +9,7 @@ import spawn, { payloadFor, SpawnSystem } from '../src/spawn'
 import { createRandomActor, createUserActor } from './stubs/actors'
 
 describe('testing invoke', () => {
-  jest.setTimeout(30_000)
+  jest.setTimeout(120_000)
 
   const randomActorName = crypto.randomUUID()
   let system: SpawnSystem

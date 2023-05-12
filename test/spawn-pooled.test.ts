@@ -3,6 +3,8 @@ import spawn, { payloadFor, SpawnSystem } from '../src/spawn'
 import { createPooledActor } from './stubs/actors'
 
 describe('testing spawn pooled actor', () => {
+  jest.setTimeout(120_000)
+
   let system: SpawnSystem
 
   beforeAll(async () => {

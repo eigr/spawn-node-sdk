@@ -10,14 +10,14 @@ import {
 } from '../protos/eigr/functions/protocol/actors/actor'
 import { MessageType } from '@protobuf-ts/runtime'
 import { Any } from '../protos/google/any'
-import { Noop } from '../protos/eigr/functions/protocol/actors/protocol'
+import { Noop, JSONType } from '../protos/eigr/functions/protocol/actors/protocol'
 
 /**
  * Defines the type for options that can be passed when creating an Actor
  */
 export type IActorOpts = {
   name: string
-  stateType?: MessageType<any>
+  stateType?: MessageType<any> | 'json'
   kind?: Kind
   stateful?: boolean
   snapshotTimeout?: bigint
@@ -37,15 +37,16 @@ export type ActorOpts = IActorOpts | PooledActorOpts
 
 export const defaultActorOpts = {
   kind: Kind.SINGLETON,
+  stateType: 'json',
   stateful: true,
   snapshotTimeout: 10_000n,
   deactivatedTimeout: 2_000n
-}
+} as ActorOpts
 
 export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
   const state: ActorState = {
     tags: opts.tags || {},
-    state: Any.pack(opts.stateType?.create() || Noop.create(), opts.stateType || Noop)
+    state: getPrivateInitialState(opts)
   }
 
   const timeoutSnapshot: TimeoutStrategy = {
@@ -92,4 +93,12 @@ export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
     commands: [],
     timerCommands: []
   }
+}
+
+function getPrivateInitialState(opts: ActorOpts) {
+  if (opts.stateType === 'json') {
+    return Any.pack(JSONType.create({ content: '{}' }), JSONType)
+  }
+
+  return Any.pack(opts.stateType?.create() || Noop.create(), opts.stateType || Noop)
 }
