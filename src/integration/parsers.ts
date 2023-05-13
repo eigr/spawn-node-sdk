@@ -4,7 +4,8 @@ import {
   Noop,
   SideEffect,
   InvocationRequest,
-  Broadcast as BroadcastProto
+  Broadcast as BroadcastProto,
+  JSONType
 } from '../protos/eigr/functions/protocol/actors/protocol'
 import { Any } from '../protos/google/any'
 import { MessageType } from '@protobuf-ts/runtime'
@@ -20,7 +21,11 @@ type OneofPayload =
 
 export type PayloadRef<T extends object = any> = { ref: MessageType<T>; instance: any }
 
-export const unpackPayload = (payload: OneofPayload, type: MessageType<any>) => {
+export const unpackPayload = (payload: OneofPayload, type?: MessageType<any>) => {
+  if (!payload) {
+    return null
+  }
+
   if (payload.oneofKind === undefined) {
     return null
   }
@@ -29,23 +34,40 @@ export const unpackPayload = (payload: OneofPayload, type: MessageType<any>) => 
     return Noop.create()
   }
 
-  return unpack(payload.value, type)
+  const unpacked = unpack(payload.value, type || 'json')
+
+  if (JSONType.is(unpacked)) {
+    return JSON.parse(unpacked.content)
+  }
+
+  return unpacked
 }
 
-export const buildPayload = (payload: any): OneofPayload => {
+export const buildPayload = (payload?: PayloadRef<any> | Noop | JSON): OneofPayload => {
   if (!payload) {
     return { oneofKind: undefined }
   }
 
-  if (Noop.is(payload)) {
+  if (Noop.is(payload as Noop)) {
     return { oneofKind: 'noop', noop: Noop.create() }
   }
 
-  if (payload.ref !== undefined) {
-    return { oneofKind: 'value', value: Any.pack(payload.instance, payload.ref) }
+  if ((payload as PayloadRef<any>).ref !== undefined && (payload as PayloadRef<any>).instance) {
+    return {
+      oneofKind: 'value',
+      value: Any.pack((payload as PayloadRef<any>).instance, (payload as PayloadRef<any>).ref)
+    }
   }
 
-  return { oneofKind: undefined }
+  try {
+    const content = JSON.stringify(payload as JSON)
+    return {
+      oneofKind: 'value',
+      value: Any.pack(JSONType.create({ content }), JSONType)
+    }
+  } catch (ex) {
+    return { oneofKind: undefined }
+  }
 }
 
 export const scheduledToBigInt = (scheduledTo: Date | number | undefined): bigint | undefined => {
@@ -130,8 +152,29 @@ export const parseScheduledTo = (delayMs?: number, scheduledTo?: Date): number |
   return scheduledTo.getTime()
 }
 
-export const unpack = (value: any, type: MessageType<any>) => {
-  if (!value) return null
+export const unpack = (object: any, type: MessageType<any> | 'json'): any | null => {
+  if (!object) return null
 
-  return Any.unpack(value, type)
+  if (Noop.is(object)) {
+    return Noop.create()
+  }
+
+  if (type === 'json' && object.value.length !== 0) {
+    const unpacked = Any.unpack(object, JSONType)
+    return JSON.parse(unpacked.content)
+  }
+
+  return Any.unpack(object, type === 'json' ? Noop : type)
+}
+
+export const pack = (object: any, type: MessageType<any> | 'json'): Any | undefined => {
+  if (!object) return undefined
+
+  if (type === 'json') {
+    const content = typeof object === 'object' ? JSON.stringify(object) : object
+
+    return Any.pack({ content }, JSONType)
+  }
+
+  return Any.pack(object, type)
 }

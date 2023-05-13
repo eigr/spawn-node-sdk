@@ -35,7 +35,7 @@ import { Value } from './client-actor/value'
  */
 export type ActorActionOpts = {
   name: string
-  payloadType: MessageType<any>
+  payloadType?: MessageType<any> | 'json'
   timer?: number
 }
 
@@ -43,9 +43,10 @@ export type ActorActionCallback<T extends object = any, K extends object = any> 
   context: ActorContext<T>,
   payload: any
 ) => Promise<Value<T, K>>
+
 export type ActorCallbackConnector = {
-  stateType: any
-  payloadType: any
+  stateType: MessageType<any> | 'json'
+  payloadType: MessageType<any> | 'json'
   callback: ActorActionCallback
 }
 
@@ -166,19 +167,22 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
         addAction: (actionOpts: ActorActionOpts, callback: ActorActionCallback) => {
           if (registered) throw new SpawnSystemRegisteredError(registeredErrorMsg)
 
-          if (actionOpts.timer) {
+          const derfaultActionOpts = { payloadType: 'json' }
+          const overridenActionOpts = { ...derfaultActionOpts, ...actionOpts } as ActorActionOpts
+
+          if (overridenActionOpts.timer) {
             actor.timerCommands.push({
-              command: { name: actionOpts.name },
-              seconds: actionOpts.timer
+              command: { name: overridenActionOpts.name },
+              seconds: overridenActionOpts.timer
             })
           } else {
-            actor.commands.push({ name: actionOpts.name })
+            actor.commands.push({ name: overridenActionOpts.name })
           }
 
-          registeredCallbacks.set(`${system}${actorName}${actionOpts.name}`, {
+          registeredCallbacks.set(`${system}${actorName}${overridenActionOpts.name}`, {
             callback,
-            stateType: opts.stateType || Noop,
-            payloadType: actionOpts.payloadType || Noop
+            stateType: overridenOpts.stateType || Noop,
+            payloadType: overridenActionOpts.payloadType || Noop
           })
         }
       }
@@ -209,7 +213,7 @@ export type InvokeOpts = {
   command: string
   system?: string
   response?: MessageType<any>
-  payload?: PayloadRef<any>
+  payload?: PayloadRef<any> | { [key: number | string]: any }
   async?: boolean
   pooled?: boolean
   metadata?: { [key: string]: string }
@@ -263,11 +267,7 @@ const invoke = async (actorName: string, invokeOpts: InvokeOpts): Promise<any | 
 
   const { payload } = await invokeRequest(request)
 
-  if (invokeOpts.response) {
-    return unpackPayload(payload, invokeOpts.response)
-  }
-
-  return null
+  return unpackPayload(payload, invokeOpts.response)
 }
 
 export type SpawnActorOpts = {

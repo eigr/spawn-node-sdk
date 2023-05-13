@@ -5,7 +5,7 @@ import { payloadFor } from '../spawn'
 
 export class Value<T extends object = object, K extends object = object> {
   private _state?: T
-  private _response?: PayloadRef<K>
+  private _response?: PayloadRef<K> | { [key: string | number]: any }
   private _broadcast?: Broadcast
   private _pipe?: Pipe
   private _forward?: Forward
@@ -21,11 +21,13 @@ export class Value<T extends object = object, K extends object = object> {
     return this
   }
 
-  response(ref: MessageType<K> | PayloadRef<K>, instance?: K) {
-    if ((ref as PayloadRef<K>)?.ref === undefined) {
+  response(ref: MessageType<K> | PayloadRef<K> | { [key: string | number]: any }, instance?: K) {
+    if ((ref as PayloadRef<K>)?.ref === undefined && instance) {
       this._response = payloadFor(ref as MessageType<K>, instance)
-    } else {
+    } else if ((ref as PayloadRef<K>).ref && (ref as PayloadRef<K>).instance) {
       this._response = ref as PayloadRef<K>
+    } else {
+      this._response = ref as { [key: string | number]: any }
     }
 
     return this

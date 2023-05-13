@@ -2,6 +2,7 @@ import {
   ActorInvocation,
   ActorInvocationResponse,
   Context,
+  JSONType,
   Noop
 } from '../../protos/eigr/functions/protocol/actors/protocol'
 import { ActorContext } from '../../client-actor/workflows'
@@ -14,6 +15,7 @@ import {
   buildPayload,
   buildRoutingWorkflow,
   buildSideEffects,
+  pack,
   unpack
 } from '../parsers'
 
@@ -58,7 +60,16 @@ export const registerControllerHandler = (
       payloadToUnpack = payload.value
     }
 
-    const value = await callback(context, payloadType.fromBinary(payloadToUnpack.value))
+    let finalPayload
+
+    if (payloadType === 'json') {
+      const rawJSON = JSONType.fromBinary(payloadToUnpack.value).content
+      finalPayload = rawJSON && JSON.parse(rawJSON)
+    } else {
+      finalPayload = payloadType.fromBinary(payloadToUnpack.value)
+    }
+
+    const value = await callback(context, finalPayload)
     const parsedValue = value.parse()
 
     const response = ActorInvocationResponse.create({
@@ -69,7 +80,7 @@ export const registerControllerHandler = (
         self: actor,
         metadata: currentContext?.metadata,
         tags: parsedValue.tags || currentContext!.tags || {},
-        state: parsedValue.state ? Any.pack(parsedValue.state, stateType) : currentContext!.state
+        state: parsedValue.state ? pack(parsedValue.state, stateType) : currentContext!.state
       }),
       payload: buildPayload(parsedValue.value),
       workflow: {

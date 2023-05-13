@@ -152,6 +152,34 @@ export const createUserActor = (system: SpawnSystem) => {
   return actor
 }
 
+export const createJsonActor = (system: SpawnSystem) => {
+  interface ActorState {
+    sum: number
+  }
+  const actor = system.buildActor({
+    name: 'json_actor01'
+  })
+
+  actor.addAction({ name: 'init' }, async (context: ActorContext<ActorState>) => {
+    const sum = context.state?.sum || 0
+
+    return Value.of<ActorState, any>().state({ sum })
+  })
+
+  actor.addAction(
+    { name: 'plusOne' },
+    async (context: ActorContext<ActorState>, { value }: any) => {
+      const sum = (value || 0) + 1
+
+      return Value.of<ActorState, any>()
+        .state({ ...context.state, sum })
+        .response({ sum })
+    }
+  )
+
+  return actor
+}
+
 export const createRandomActor = (system: SpawnSystem, actorName: string) => {
   const actor = system.buildActor({
     name: actorName,
@@ -199,8 +227,8 @@ export const createPooledActor = (system: SpawnSystem) => {
     name: 'pooledActorExample',
     kind: Kind.POOLED,
     stateful: false,
-    minPoolSize: 10,
-    maxPoolSize: 15
+    minPoolSize: 1,
+    maxPoolSize: 3
   })
 
   actor.addAction(
