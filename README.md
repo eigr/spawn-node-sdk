@@ -96,7 +96,7 @@ const system = spawn.createSystem('SpawnSystemName')
 // You can register multiple actors with different options
 const actor = system.buildActor({
   name: 'exampleActor',
-  stateType: UserState,
+  stateType: UserState, // or 'json'
   stateful: true,
   snapshotTimeout: 10_000n,
   deactivatedTimeout: 60_000n
@@ -110,6 +110,7 @@ const setNameHandler = async (context: ActorContext<UserState>, payload: ChangeU
 }
 
 // This is similar to a Route definition in REST
+// the default payloadType is 'json'
 actor.addAction({ name: 'setName', payloadType: ChangeUserNamePayload }, setNameHandler)
 
 system.register()
