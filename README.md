@@ -45,7 +45,6 @@ services:
 
 > **NOTE:** `Windows w/ WSL2` - If you want to use docker for spawn-proxy and local host for your NodeJS check this article https://www.beyondjava.net/docker-wsl-network
 
-
 Set the following ENV variables for your NodeJS runtime (following .env.example)
 
 ```bash
@@ -54,7 +53,7 @@ PROXY_HTTP_HOST=localhost
 USER_FUNCTION_PORT=8090
 ```
 
-Define a protobuf file (lets save this at `protos/examples/user_example.proto`)
+Define a protobuf file (lets save this at `protos/examples/user_example.proto`), if you want to skip this part, you can use 'json' type actors.
 
 ```proto
 syntax = "proto3";
