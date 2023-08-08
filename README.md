@@ -24,7 +24,7 @@ version: "3.8"
 
 services:
   spawn-proxy:
-    image: eigr/spawn-proxy:0.5.0
+    image: eigr/spawn-proxy:1.0.0-rc16
     restart: always
     environment:
       PROXY_APP_NAME: spawn
@@ -38,6 +38,8 @@ services:
       SPAWN_STATESTORE_KEY: 3Jnb0hZiHIzHTOih7t2cTEPEpY98Tu1wvQkPfq/XwqE=
       USER_FUNCTION_HOST: 0.0.0.0 # Your NodeJS runtime host
       USER_FUNCTION_PORT: 8090 # Your NodeJS runtime exposed port
+      SPAWN_SUPERVISORS_STATE_HANDOFF_CONTROLLER: "crdt"
+      PROXY_ACTOR_SYSTEM_NAME: "spawn-system" # change this to the system you've registered
     # network_mode: host # only uncomment this if you're running your nodejs locally in Linux, check note below for Windows
     ports:
       - "9001:9001"
@@ -95,7 +97,7 @@ const system = spawn.createSystem('SpawnSystemName')
 // You can register multiple actors with different options
 const actor = system.buildActor({
   name: 'exampleActor',
-  stateType: UserState, // or 'json'
+  stateType: UserState, // or 'json' if you don't want to use protobufs
   stateful: true,
   snapshotTimeout: 10_000n,
   deactivatedTimeout: 60_000n
