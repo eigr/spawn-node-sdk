@@ -43,26 +43,26 @@ const system = spawn.createSystem('spawn_sys_bench')
     'Invoke',
     b.add('Stateful invoke default function', async () => {
       await spawn.invoke(randomActorName, {
-        command: 'getState',
+        action: 'getState',
         response: UserState
       })
     }),
     b.add('Stateful invoke setName function', async () => {
       const payload = payloadFor(ChangeUserName, { newName: 'new_name' })
-      const command = 'setName'
+      const action = 'setName'
 
       await spawn.invoke(randomActorName, {
-        command,
+        action,
         payload,
         response: ChangeUserNameResponse
       })
     }),
     b.add('Stateful invoke async function', async () => {
       const payload = payloadFor(ChangeUserName, { newName: 'new_name_async' })
-      const command = 'setName'
+      const action = 'setName'
 
       await spawn.invoke(randomActorName, {
-        command,
+        action,
         payload,
         response: ChangeUserNameResponse,
         async: true

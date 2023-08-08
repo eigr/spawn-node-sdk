@@ -11,7 +11,8 @@ describe('testing invoke', () => {
 
     createJsonActor(system)
 
-    await system.register()
+    const registered = await system.register()
+    expect(registered.status?.message).toBe('Accepted')
   })
 
   afterAll(async () => {
@@ -20,7 +21,7 @@ describe('testing invoke', () => {
 
   test('using default proxy function "getState" to get the current state in json_actor01', async () => {
     const { sum } = await spawn.invoke('json_actor01', {
-      command: 'getState',
+      action: 'getState',
       system: 'SpawnSysTest'
     })
 
@@ -29,7 +30,7 @@ describe('testing invoke', () => {
 
   test('invoking plusOne in json_actor01', async () => {
     const { sum } = await spawn.invoke('json_actor01', {
-      command: 'plusOne',
+      action: 'plusOne',
       payload: { value: 1, fwf: 1 },
       system: 'SpawnSysTest'
     })

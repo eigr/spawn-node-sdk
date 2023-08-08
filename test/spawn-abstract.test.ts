@@ -1,26 +1,27 @@
 import { ChangeUserNameStatus, ChangeUserNameResponse, ChangeUserName } from './protos/user_test'
 import spawn, { payloadFor, SpawnSystem } from '../src/spawn'
-import { createAbstractActor } from './stubs/actors'
+import { createNamedActor } from './stubs/actors'
 
-describe('testing spawn abstract actor', () => {
+describe('testing spawn named actor', () => {
   let system: SpawnSystem
 
   beforeAll(async () => {
     system = spawn.createSystem('SpawnSysTest')
 
-    createAbstractActor(system)
+    createNamedActor(system)
 
-    await system.register()
+    const registered = await system.register()
+    expect(registered.status?.message).toBe('Accepted')
   })
 
   afterAll(async () => {
     await system.destroy()
   })
 
-  test('settting new name for a abstract actor', async () => {
-    await spawn.spawnActor('abstractActorTest_01', {
+  test('settting new name for a named actor', async () => {
+    await spawn.spawnActor('namedActorTest_01', {
       system: 'SpawnSysTest',
-      actorRef: 'abstractActorTest'
+      actorRef: 'namedActorTest'
     })
 
     const expected = ChangeUserNameResponse.create({
@@ -29,10 +30,10 @@ describe('testing spawn abstract actor', () => {
     })
 
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'novo_nome' }))
-    const command = 'setName'
+    const action = 'setName'
 
-    const newNameResponse = await spawn.invoke('abstractActorTest_01', {
-      command,
+    const newNameResponse = await spawn.invoke('namedActorTest_01', {
+      action,
       payload,
       response: ChangeUserNameResponse,
       system: 'SpawnSysTest'
@@ -42,20 +43,20 @@ describe('testing spawn abstract actor', () => {
     expect(newNameResponse.status).toBe(expected.status)
   })
 
-  test('settting new name for a abstract actor invoking directly', async () => {
+  test('settting new name for a named actor invoking directly', async () => {
     const expected = ChangeUserNameResponse.create({
       status: ChangeUserNameStatus.OK,
       newName: 'novo_nome'
     })
 
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'novo_nome' }))
-    const command = 'setName'
+    const action = 'setName'
 
-    const newNameResponse = await spawn.invoke('abstractActorTest_02', {
-      command,
+    const newNameResponse = await spawn.invoke('namedActorTest_02', {
+      action,
       payload,
       response: ChangeUserNameResponse,
-      ref: 'abstractActorTest',
+      ref: 'namedActorTest',
       system: 'SpawnSysTest'
     })
 

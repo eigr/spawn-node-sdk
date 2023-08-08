@@ -9,7 +9,7 @@ import {
   TimeoutStrategy
 } from '../protos/eigr/functions/protocol/actors/actor'
 import { MessageType } from '@protobuf-ts/runtime'
-import { Any } from '../protos/google/any'
+import { Any } from '../protos/eigr/functions/protocol/actors/google/protobuf/any'
 import { Noop, JSONType } from '../protos/eigr/functions/protocol/actors/protocol'
 
 /**
@@ -36,7 +36,7 @@ export type PooledActorOpts = IActorOpts & {
 export type ActorOpts = IActorOpts | PooledActorOpts
 
 export const defaultActorOpts = {
-  kind: Kind.SINGLETON,
+  kind: Kind.UNAMED,
   stateType: 'json',
   stateful: true,
   snapshotTimeout: 10_000n,
@@ -74,7 +74,7 @@ export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
   const metadata: Metadata = { channelGroup: opts.channel!, tags: {} }
   const id = { name: opts.name, system } as ActorId
 
-  if (opts.kind === Kind.ABSTRACT) {
+  if (opts.kind === Kind.NAMED) {
     id.parent = opts.name
   }
 
@@ -90,8 +90,8 @@ export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
       deactivationStrategy,
       snapshotStrategy
     },
-    commands: [],
-    timerCommands: []
+    actions: [],
+    timerActions: []
   }
 }
 

@@ -7,7 +7,7 @@ import {
   Broadcast as BroadcastProto,
   JSONType
 } from '../protos/eigr/functions/protocol/actors/protocol'
-import { Any } from '../protos/google/any'
+import { Any } from '../protos/eigr/functions/protocol/actors/google/protobuf/any'
 import { MessageType } from '@protobuf-ts/runtime'
 import {
   Pipe as PipeProtocol,
@@ -87,7 +87,7 @@ export const buildBroadcast = (broadcast: Broadcast | undefined): BroadcastProto
 
   return BroadcastProto.create({
     channelGroup: broadcast.channel,
-    commandName: broadcast.command,
+    actionName: broadcast.action,
     payload: buildPayload(broadcast.payload)
   })
 }
@@ -103,7 +103,7 @@ export const buildSideEffects = (callerName: string, system: string, effects?: E
         id: ActorId.create({ name: effect.actorName, system })
       }),
       payload,
-      commandName: effect.command,
+      actionName: effect.action,
       async: true,
       caller: ActorId.create({ name: callerName, system }),
       scheduledTo: scheduledToBigInt(
@@ -121,14 +121,14 @@ export const buildRoutingWorkflow = (pipe?: Pipe, forward?: Forward) => {
   if (pipe) {
     routingWorkflow = {
       oneofKind: 'pipe',
-      pipe: { actor: pipe.actorName, commandName: pipe.command } as PipeProtocol
+      pipe: { actor: pipe.actorName, actionName: pipe.action } as PipeProtocol
     }
   }
 
   if (forward) {
     routingWorkflow = {
       oneofKind: 'forward',
-      forward: { actor: forward.actorName, commandName: forward.command } as ForwardProtocol
+      forward: { actor: forward.actorName, actionName: forward.action } as ForwardProtocol
     }
   }
 

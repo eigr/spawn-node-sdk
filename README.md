@@ -125,14 +125,14 @@ import { UserState, ChangeUserNamePayload, ChangeUserNameResponse } from 'src/pr
 (async () => {
   const payload = { newName: 'changedName' } as ChangeUserNamePayload
   const response: ChangeUserNameResponse = await spawn.invoke('exampleActor', {
-    command: 'setName',
+    action: 'setName',
     response: ChangeUserNameResponse,
     payload: payloadFor(ChangeUserNamePayload, payload)
     // system: 'SpawnSystemName'
   })
 
   const state: UserState = await spawn.invoke('exampleActor', {
-    command: 'getState',
+    action: 'getState',
     response: UserState,
     // system: 'SpawnSystemName'
   })
@@ -144,8 +144,8 @@ import { UserState, ChangeUserNamePayload, ChangeUserNameResponse } from 'src/pr
 ## **Documentation**
 
 - [Actor options](./documentation/actor-options.md)
-  - [Singleton](./documentation/actor-options.md#singleton-actor)
-  - [Abstract](./documentation/actor-options.md#abstract-actor)
+  - [Unamed](./documentation/actor-options.md#unamed-actor)
+  - [Named](./documentation/actor-options.md#named-actor)
   - [Pooled](./documentation/actor-options.md#pooled-actor)
   - [Default Actions](./documentation/actor-options.md#default-actions)
 - [Actor workflows](./documentation/actor-workflows.md)

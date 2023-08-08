@@ -2,9 +2,9 @@
 
 This is an example of what kind of Actors you can create with Spawn
 
-## Singleton Actor
+## Unamed Actor
 
-In this example we are creating an actor in a Singleton way, that is, it is a known actor at compile time.
+In this example we are creating an actor in a Unamed way, that is, it is a known actor at compile time.
 
 ```TS
 import spawn, { ActorContext, Kind, Value } from '@eigr/spawn-sdk'
@@ -14,9 +14,9 @@ const system = spawn.createSystem()
 
 // You can register multiple actors with different options
 const actor = system.buildActor({
-  name: 'singletonActorExample',
+  name: 'unamedActorExample',
   stateType: UserState,
-  kind: Kind.SINGLETON,
+  kind: Kind.UNAMED,
   stateful: true,
   snapshotTimeout: 10_000n,
   deactivatedTimeout: 60_000n
@@ -42,17 +42,17 @@ It can be invoked with:
 import spawn, { payloadFor } from '@eigr/spawn-sdk'
 import { ChangeUserNamePayload, ChangeUserNameResponse } from 'src/protos/examples/user_example'
 
-spawn.invoke('singletonActorExample', {
-  command: 'setName',
+spawn.invoke('unamedActorExample', {
+  action: 'setName',
   response: ChangeUserNameResponse,
   payload: payloadFor(ChangeUserNamePayload, { newName: 'newName for actor' })
 })
 .then(response => console.log(response)) // { status: 1 }
 ```
 
-## Abstract Actor
+## Named Actor
 
-We can also create Unnamed Dynamic/Lazy actors, that is, despite having its abstract behavior defined at compile time, a Lazy actor will only have a concrete instance when it is associated with an identifier/name at runtime. Below follows the same previous actor being defined as abstract.
+We can also create Unnamed Dynamic/Lazy actors, that is, despite having its Named behavior defined at compile time, a Lazy actor will only have a concrete instance when it is associated with an identifier/name at runtime. Below follows the same previous actor being defined as Named.
 
 ```TS
 import spawn, { ActorContext, Kind, Value } from '@eigr/spawn-sdk'
@@ -61,9 +61,9 @@ import { UserState, ChangeUserNamePayload, ChangeUserNameResponse, ChangeUserNam
 const system = spawn.createSystem()
 
 const actor = system.buildActor({
-  name: 'abstractActorExample',
+  name: 'namedActorExample',
   stateType: UserState,
-  kind: Kind.ABSTRACT,
+  kind: Kind.NAMED,
   stateful: true,
   snapshotTimeout: 10_000n,
   deactivatedTimeout: 60_000n
@@ -88,15 +88,15 @@ import spawn, { payloadFor } from '@eigr/spawn-sdk'
 import { ChangeUserNamePayload, ChangeUserNameResponse } from 'src/protos/examples/user_example'
 
 spawn.invoke('some-user-id-01', {
-  command: 'setName',
-  ref: 'abstractActorExample',
+  action: 'setName',
+  ref: 'namedActorExample',
   response: ChangeUserNameResponse,
   payload: payloadFor(ChangeUserNamePayload, { newName: 'newName for actor some-user-id-01' })
 })
 .then(response => console.log(response)) // { status: 1 }
 ```
 
-Notice that the only thing that has changed is the the kind of actor, in this case the kind is set to `Kind.ABSTRACT`
+Notice that the only thing that has changed is the the kind of actor, in this case the kind is set to `Kind.NAMED`
 And we need to reference the original name in the invocation or instantiate it before using `spawn.spawnActor`
 
 ## Pooled Actor
@@ -135,7 +135,7 @@ It can be invoked with:
 import spawn, { payloadFor } from '@eigr/spawn-sdk'
 
 spawn.invoke('pooledActorExample', {
-  command: 'handleSomething',
+  action: 'handleSomething',
   pooled: true,
   payload: payloadFor(SomethingActionPayload, { something: 'Something you will be using inside handler' })
 })

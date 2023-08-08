@@ -20,7 +20,8 @@ describe('testing invoke', () => {
     createUserActor(system)
     createRandomActor(system, randomActorName)
 
-    await system.register()
+    const registered = await system.register()
+    expect(registered.status?.message).toBe('Accepted')
   })
 
   afterAll(async () => {
@@ -29,7 +30,7 @@ describe('testing invoke', () => {
 
   test('using default proxy function "getState" to get the current state in a random actor', async () => {
     const userState = await spawn.invoke(randomActorName, {
-      command: 'getState',
+      action: 'getState',
       response: UserState,
       system: 'SpawnSysTest'
     })
@@ -37,11 +38,11 @@ describe('testing invoke', () => {
     expect(userState.name).toBe('')
   })
 
-  // never use this for command discovery purpose
+  // never use this for action discovery purpose
   test('invoking non existing function throws SpawnInvocationError', async () => {
     try {
       await spawn.invoke(randomActorName, {
-        command: 'unknown',
+        action: 'unknown',
         response: UserState,
         system: 'SpawnSysTest'
       })
@@ -57,10 +58,10 @@ describe('testing invoke', () => {
     })
 
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'novo_nome' }))
-    const command = 'setName'
+    const action = 'setName'
 
     const newNameResponse = await spawn.invoke('MockUserActor', {
-      command,
+      action,
       payload,
       response: ChangeUserNameResponse,
       system: 'SpawnSysTest'
@@ -70,7 +71,7 @@ describe('testing invoke', () => {
     expect(newNameResponse.status).toBe(expected.status)
 
     const userState = await spawn.invoke(`MockUserActor`, {
-      command: 'getState',
+      action: 'getState',
       response: UserState,
       system: 'SpawnSysTest'
     })
@@ -88,10 +89,10 @@ describe('testing invoke', () => {
       ChangeUserName,
       ChangeUserName.create({ newName: 'newNameToIgnore' })
     )
-    const command = 'setNameMetadata'
+    const action = 'setNameMetadata'
 
     const newNameResponse = await spawn.invoke('MockUserActor', {
-      command,
+      action,
       payload,
       metadata: { metakey: 'newNameMeta' },
       response: ChangeUserNameResponse,
@@ -102,7 +103,7 @@ describe('testing invoke', () => {
     expect(newNameResponse.status).toBe(expected.status)
 
     const resp = await spawn.invoke('MockUserActor', {
-      command: 'getTagsName',
+      action: 'getTagsName',
       response: ChangeUserNameResponse,
       system: 'SpawnSysTest'
     })
@@ -110,7 +111,7 @@ describe('testing invoke', () => {
     expect(resp.newName).toBe('newNameMeta-initialTags-initTag')
 
     const userState = await spawn.invoke(`MockUserActor`, {
-      command: 'getState',
+      action: 'getState',
       response: UserState,
       system: 'SpawnSysTest'
     })
@@ -119,15 +120,15 @@ describe('testing invoke', () => {
   })
 
   test('invoking noreply async function and changing internal state with it', async () => {
-    const command = 'noreplyChangeName'
+    const action = 'noreplyChangeName'
     const invokeAsync = await spawn.invoke('MockUserActor', {
-      command,
+      action,
       async: true,
       system: 'SpawnSysTest'
     })
     const stateChanged = await spawn.invoke('MockUserActor', {
       system: 'SpawnSysTest',
-      command: 'get',
+      action: 'get',
       response: UserState
     })
 

@@ -19,7 +19,8 @@ describe('testing workflows', () => {
     createUserActor(system)
     createRandomActor(system, randomActorName)
 
-    await system.register()
+    const registered = await system.register()
+    expect(registered.status?.message).toBe('Accepted')
   })
 
   afterAll(async () => {
@@ -28,11 +29,11 @@ describe('testing workflows', () => {
 
   test('settting new name and getting it after piped', async () => {
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'newNameInput' }))
-    const command = 'pipeTest'
+    const action = 'pipeTest'
 
     const newNameResponse = await spawn.invoke('MockUserActor', {
       system: 'SpawnSysTest',
-      command,
+      action,
       payload,
       response: ChangeUserNameResponse
     })
@@ -41,7 +42,7 @@ describe('testing workflows', () => {
 
     const userState = await spawn.invoke(`MockUserActor`, {
       system: 'SpawnSysTest',
-      command: 'getState',
+      action: 'getState',
       response: UserState
     })
 
@@ -50,11 +51,11 @@ describe('testing workflows', () => {
 
   test('settting new name and getting it after forwarded', async () => {
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'newNameForward' }))
-    const command = 'forwardTest'
+    const action = 'forwardTest'
 
     const newNameResponse = await spawn.invoke('MockUserActor', {
       system: 'SpawnSysTest',
-      command,
+      action,
       payload,
       response: ChangeUserNameResponse
     })
@@ -63,7 +64,7 @@ describe('testing workflows', () => {
 
     const userState = await spawn.invoke(`MockUserActor`, {
       system: 'SpawnSysTest',
-      command: 'getState',
+      action: 'getState',
       response: UserState
     })
 
@@ -72,11 +73,11 @@ describe('testing workflows', () => {
 
   test('calling effects to another actor schedule for 1 second in the future', async () => {
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'newNameForward' }))
-    const command = 'effectsTest'
+    const action = 'effectsTest'
 
     await spawn.invoke('MockUserActor', {
       system: 'SpawnSysTest',
-      command,
+      action,
       payload,
       response: ChangeUserNameResponse
     })
@@ -85,7 +86,7 @@ describe('testing workflows', () => {
 
     const userState = await spawn.invoke(`MockUserActor`, {
       system: 'SpawnSysTest',
-      command: 'getState',
+      action: 'getState',
       response: UserState
     })
 
@@ -93,18 +94,18 @@ describe('testing workflows', () => {
   })
 
   test('calling broadcast and seeing its effect in another actor', async () => {
-    const command = 'broadcastTest'
+    const action = 'broadcastTest'
 
     await spawn.invoke('MockUserActor', {
       system: 'SpawnSysTest',
-      command
+      action
     })
 
     await timeout(100)
 
     const userState = await spawn.invoke(randomActorName, {
       system: 'SpawnSysTest',
-      command: 'getState',
+      action: 'getState',
       response: UserState
     })
 

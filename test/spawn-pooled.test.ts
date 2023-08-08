@@ -12,7 +12,8 @@ describe('testing spawn pooled actor', () => {
 
     createPooledActor(system)
 
-    await system.register()
+    const registered = await system.register()
+    expect(registered.status?.message).toBe('Accepted')
   })
 
   afterAll(async () => {
@@ -26,10 +27,10 @@ describe('testing spawn pooled actor', () => {
     })
 
     const payload = payloadFor(ChangeUserName, ChangeUserName.create({ newName: 'namePooledCall' }))
-    const command = 'setName'
+    const action = 'setName'
 
     const newNameResponse = await spawn.invoke('pooledActorExample', {
-      command,
+      action,
       payload,
       pooled: true,
       response: ChangeUserNameResponse,

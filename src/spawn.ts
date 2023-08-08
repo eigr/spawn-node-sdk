@@ -101,7 +101,7 @@ let systemCreated = false
 
     // to invoke you would do something like
     const changeUserNameResponse = await spawn.invoke('user_actor_example', {
-      command: 'setName',
+      action: 'setName',
       payload: payloadFor(ChangeUserName, { newName: 'new_user_name' }),
       response: ChangeUserNameResponse
     }) as ChangeUserNameResponse
@@ -158,7 +158,7 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
       return {
         /**
          * Use Noop payload if you don't need to interact with payload
-         * @param {ActorActionOpts} actionOpts - The name of the actor on which the command is to be invoked
+         * @param {ActorActionOpts} actionOpts - The name of the actor on which the action is to be invoked
          * @param {ActorActionCallback} callback - The callback that spawn will route to when invoking this action
          * - name: Name of the action
          * - payloadType: The type of the payload you will use in this action
@@ -171,12 +171,12 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
           const overridenActionOpts = { ...derfaultActionOpts, ...actionOpts } as ActorActionOpts
 
           if (overridenActionOpts.timer) {
-            actor.timerCommands.push({
-              command: { name: overridenActionOpts.name },
+            actor.timerActions.push({
+              action: { name: overridenActionOpts.name },
               seconds: overridenActionOpts.timer
             })
           } else {
-            actor.commands.push({ name: overridenActionOpts.name })
+            actor.actions.push({ name: overridenActionOpts.name })
           }
 
           registeredCallbacks.set(`${system}${actorName}${overridenActionOpts.name}`, {
@@ -188,12 +188,38 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
       }
     },
     register: async (): Promise<RegistrationResponse> => {
-      const registrationRequest = { serviceInfo, actorSystem } as RegistrationRequest
-      return registerRequest(registrationRequest).then((response) => {
-        registered = true
+      const MAX_RETRIES = 60
+      const RETRY_DELAY = 1000
+      let retries = 0
 
-        return response
-      })
+      const registrationRequest = { serviceInfo, actorSystem } as RegistrationRequest
+
+      // make this register request retry with backoff when it fails
+      const doRegister = async (): Promise<RegistrationResponse> => {
+        try {
+          const response = await registerRequest(registrationRequest)
+
+          registered = true
+
+          return response
+        } catch (error) {
+          retries++
+
+          if (retries <= MAX_RETRIES) {
+            console.log(
+              `Registration attempt failed. Retrying in ${RETRY_DELAY} ms, with error: ${error?.toString()}`
+            )
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY))
+
+            return doRegister()
+          }
+
+          console.error(`Registration failed after ${retries} retries.`)
+          throw error // Rethrow the last error if maximum retries exceeded
+        }
+      }
+
+      return doRegister()
     },
     destroy: async () => {
       return new Promise((resolve, reject) => {
@@ -210,7 +236,7 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
 }
 
 export type InvokeOpts = {
-  command: string
+  action: string
   system?: string
   response?: MessageType<any>
   payload?: PayloadRef<any> | { [key: number | string]: any }
@@ -223,21 +249,21 @@ export type InvokeOpts = {
 }
 
 /**
- * A utility function that allows for the invocation of a specific command on an actor by name.
+ * A utility function that allows for the invocation of a specific action on an actor by name.
  *
- * @param {string} actorName - The name of the actor on which the command is to be invoked
- * @param {InvokeOpts} invokeOpts - An object containing the fields that specify the details of the command invocation
- * @returns {Promise<any>} - a promise that resolves to the response payload of the command or null if no response is specified
+ * @param {string} actorName - The name of the actor on which the action is to be invoked
+ * @param {InvokeOpts} invokeOpts - An object containing the fields that specify the details of the action invocation
+ * @returns {Promise<any>} - a promise that resolves to the response payload of the action or null if no response is specified
  *
  * InvokeOpts fields:
- * - command - The command to be executed
+ * - action - The action to be executed
  * - system - (optional, defaults to current registered system) The system that the actor belongs to
  * - response - (optional) The expected response type
- * - payload - (optional) The payload to be passed to the command
- * - async - (optional) Whether the command should be executed asynchronously
- * - pooled - (optional) Whether the command should be executed in a pooled actor
- * - metadata - (optional) Additional metadata to be passed to the command
- * - ref - (optional) A reference to the abstract actor if you want to also spawn it during invocation, not needing to call spawnActor previously
+ * - payload - (optional) The payload to be passed to the action
+ * - async - (optional) Whether the action should be executed asynchronously
+ * - pooled - (optional) Whether the action should be executed in a pooled actor
+ * - metadata - (optional) Additional metadata to be passed to the action
+ * - ref - (optional) A reference to the named actor if you want to also spawn it during invocation, not needing to call spawnActor previously
  * - scheduledTo - (optional) The scheduled date to be executed
  * - delay - (optional) The delay in ms this will be invoked
  */
@@ -258,7 +284,7 @@ const invoke = async (actorName: string, invokeOpts: InvokeOpts): Promise<any | 
     }),
     metadata: metadata,
     payload: buildPayload(invokeOpts.payload),
-    commandName: invokeOpts.command,
+    actionName: invokeOpts.action,
     async: async,
     caller: undefined,
     pooled: pooled,
@@ -276,15 +302,15 @@ export type SpawnActorOpts = {
 }
 
 /**
- * Used to dinamically spawn abstract actors.
+ * Used to dinamically spawn named actors.
  * This is kind of instances for a class, the actor being the "class" definition and the actorName of this input being the instanceId
  *
  * ## Example:
  * ```
- * spawnActor('abstractActor_id_01', { system: 'test', actorRef: 'abstractActor' })
+ * spawnActor('namedActor_id_01', { system: 'test', actorRef: 'namedActor' })
  * ```
  *
- * @param {string} actorName name of the actor (this is the instanceId that you want to use usually for a abstract actor)
+ * @param {string} actorName name of the actor (this is the instanceId that you want to use usually for a named actor)
  * @param {SpawnActorOpts} opts
  * @returns {Promise<SpawnResponse>} response
  */

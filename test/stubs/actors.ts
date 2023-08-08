@@ -57,7 +57,7 @@ export const createUserActor = (system: SpawnSystem) => {
       return Value.of<UserState, ChangeUserName>()
         .state({ ...context.state, name })
         .response(ChangeUserName, { newName: `${payload.newName}Internal` })
-        .pipe({ actorName: 'userActorTransformerTest', command: 'transform' })
+        .pipe({ actorName: 'userActorTransformerTest', action: 'transform' })
     }
   )
 
@@ -69,7 +69,7 @@ export const createUserActor = (system: SpawnSystem) => {
       return Value.of<UserState, ChangeUserNameResponse>()
         .state({ ...context.state, name })
         .response(ChangeUserNameResponse, { newName: 'forward_newname_ignored', status: 1 })
-        .forward({ actorName: 'userActorTransformerTest', command: 'transform' })
+        .forward({ actorName: 'userActorTransformerTest', action: 'transform' })
     }
   )
 
@@ -81,7 +81,7 @@ export const createUserActor = (system: SpawnSystem) => {
         .effects([
           {
             actorName: context.self.name,
-            command: 'afterEffect',
+            action: 'afterEffect',
             payload: payloadFor(Noop, {}),
             scheduledTo: 1_000
           }
@@ -94,7 +94,7 @@ export const createUserActor = (system: SpawnSystem) => {
       .state({ name: 'broadcastInitial' })
       .broadcast({
         channel: 'broadcast_test',
-        command: 'broadcastReceiver',
+        action: 'broadcastReceiver',
         payload: payloadFor(Noop, {})
       })
   })
@@ -197,10 +197,10 @@ export const createRandomActor = (system: SpawnSystem, actorName: string) => {
   return actor
 }
 
-export const createAbstractActor = (system: SpawnSystem) => {
+export const createNamedActor = (system: SpawnSystem) => {
   const actor = system.buildActor({
-    name: 'abstractActorTest',
-    kind: Kind.ABSTRACT,
+    name: 'namedActorTest',
+    kind: Kind.NAMED,
     stateType: UserState,
     stateful: true
   })

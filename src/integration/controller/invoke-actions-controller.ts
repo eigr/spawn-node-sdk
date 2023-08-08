@@ -9,7 +9,7 @@ import { ActorContext } from '../../client-actor/workflows'
 import { ServerResponse, IncomingMessage } from 'node:http'
 import { sendResponse } from '../server'
 import { ActorCallbackConnector } from '../../spawn'
-import { Any } from '../../protos/google/any'
+import { Any } from '../../protos/eigr/functions/protocol/actors/google/protobuf/any'
 import {
   buildBroadcast,
   buildPayload,
@@ -25,13 +25,13 @@ export const registerControllerHandler = (
   actorCallbacks: Map<string, ActorCallbackConnector>
 ) => {
   req.on('data', async (buffer: Buffer) => {
-    const { currentContext, actor, payload, commandName, caller } =
+    const { currentContext, actor, payload, actionName, caller } =
       ActorInvocation.fromBinary(buffer)
 
-    let callbackData = actorCallbacks.get(`${actor?.system}${actor?.name}${commandName}`)
+    let callbackData = actorCallbacks.get(`${actor?.system}${actor?.name}${actionName}`)
 
     if (!callbackData) {
-      callbackData = actorCallbacks.get(`${actor?.system}${actor?.parent}${commandName}`)
+      callbackData = actorCallbacks.get(`${actor?.system}${actor?.parent}${actionName}`)
     }
 
     if (!callbackData) {
