@@ -51,9 +51,33 @@ export type ActorCallbackConnector = {
 }
 
 export type SpawnSystem = {
+  /**
+   * Builds an actor for this system with the following default options:
+   *
+   * - kind: UNAMED
+   * - stateType: 'json'
+   * - stateful: true
+   * - snapshotTimeout: 10_000n
+   * - deactivatedTimeout: 2_000n
+   *
+   * @param {ActorOpts} opts - options for creating the actor
+   */
   buildActor: (opts: ActorOpts) => {
+    /**
+     * Use Noop payload if you don't need to interact with payload
+     * @param {ActorActionOpts} actionOpts - The name of the actor on which the action is to be invoked
+     * @param {ActorActionCallback} callback - The callback that spawn will route to when invoking this action
+     * - name: Name of the action
+     * - payloadType: The type of the payload you will use in this action
+     * - timer: It means this action will be executed every X milliseconds
+     */
     addAction: (actionOpts: ActorActionOpts, callback: ActorActionCallback) => void
   }
+  /**
+   * Wraps every actors and calls proxy to register everything under a given system.
+   * This should be called one time only after all actors and actions have been registered.
+   * @returns {Promise<RegistrationResponse>} - a promise that resolves to the response payload of the action or null if no response is specified
+   */
   register: () => Promise<RegistrationResponse>
   destroy: () => Promise<any>
 }
@@ -135,16 +159,6 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
   const server = startServer(registeredCallbacks)
 
   return {
-    /**
-     * Builds an actor for this system with the following default options:
-     *
-     * - kind: POOLED
-     * - stateful: true
-     * - snapshotTimeout: 10_000n
-     * - deactivatedTimeout: 2_000n
-     *
-     * @param opts - options for creating the actor
-     */
     buildActor: (opts: ActorOpts) => {
       const registeredErrorMsg = `You cannot build more actors after registering the system. If you are trying to add dynamic actors or actions, you are probably mising some concept`
       if (registered) throw new SpawnSystemRegisteredError(registeredErrorMsg)
@@ -156,14 +170,6 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
       registry.actors[actorName] = actor
 
       return {
-        /**
-         * Use Noop payload if you don't need to interact with payload
-         * @param {ActorActionOpts} actionOpts - The name of the actor on which the action is to be invoked
-         * @param {ActorActionCallback} callback - The callback that spawn will route to when invoking this action
-         * - name: Name of the action
-         * - payloadType: The type of the payload you will use in this action
-         * - timer: It means this action will be executed every X milliseconds
-         */
         addAction: (actionOpts: ActorActionOpts, callback: ActorActionCallback) => {
           if (registered) throw new SpawnSystemRegisteredError(registeredErrorMsg)
 
@@ -273,10 +279,6 @@ const invoke = async (actorName: string, invokeOpts: InvokeOpts): Promise<any | 
   let pooled = invokeOpts.pooled || false
   let metadata = invokeOpts.metadata || {}
 
-  if (invokeOpts.ref) {
-    await spawnActor(actorName, { system, actorRef: invokeOpts.ref })
-  }
-
   const request = InvocationRequest.create({
     system: ActorSystem.create({ name: system }),
     actor: Actor.create({
@@ -288,7 +290,8 @@ const invoke = async (actorName: string, invokeOpts: InvokeOpts): Promise<any | 
     async: async,
     caller: undefined,
     pooled: pooled,
-    scheduledTo: scheduledToBigInt(parseScheduledTo(invokeOpts.delay, invokeOpts.scheduledTo))
+    scheduledTo: scheduledToBigInt(parseScheduledTo(invokeOpts.delay, invokeOpts.scheduledTo)),
+    registerRef: invokeOpts.ref
   })
 
   const { payload } = await invokeRequest(request)

@@ -19,10 +19,12 @@
   "scripts": {
     "tsc": "tsc",
     "proto-gen": "protoc --ts_out ./src/protos/ --proto_path protos protos/**/*.proto",
-    "proto-gen-spawn": "protoc --ts_out ./src/protos/eigr/functions/protocol/actors --proto_path protos/eigr/functions/protocol/actors protos/eigr/functions/protocol/actors/*.proto",
+    "proto-gen-spawn-protocol": "protoc --ts_out ./src/protos/eigr/functions/protocol/actors --proto_path protos/eigr/functions/protocol/actors protos/eigr/functions/protocol/actors/protocol.proto",
+    "proto-gen-spawn-actor": "protoc --ts_out ./src/protos/eigr/functions/protocol/actors --proto_path protos/eigr/functions/protocol/actors protos/eigr/functions/protocol/actors/actor.proto",
+    "proto-gen-spawn-state": "protoc --ts_out ./src/protos/eigr/functions/protocol/actors --proto_path protos/eigr/functions/protocol/actors protos/eigr/functions/protocol/actors/state.proto",
     "start": "ts-node --esm --require tsconfig-paths/register index.ts",
     "run-benchmark": "ts-node --esm --require tsconfig-paths/register benchmark/benchmark.ts",
-    "test": "jest --forceExit --runInBand",
+    "test": "jest --forceExit --runInBand --detectOpenHandles",
     "format": "prettier --config .prettierrc '{src,test}/**/*.ts' --write"
   },
   "author": "eigr",

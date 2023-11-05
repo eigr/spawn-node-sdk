@@ -345,6 +345,7 @@ export interface Workflow {
  *   * async: Indicates whether the action should be processed synchronously, where a response should be sent back to the user function,
  *            or whether the action should be processed asynchronously, i.e. no response sent to the caller and no waiting.
  *   * metadata: Meta information or headers
+ *   * register_ref: If the invocation should register the specific actor with the given name without having to call register before
  *
  * @generated from protobuf message eigr.functions.protocol.InvocationRequest
  */
@@ -404,6 +405,10 @@ export interface InvocationRequest {
    * @generated from protobuf field: bool pooled = 10;
    */
   pooled: boolean
+  /**
+   * @generated from protobuf field: string register_ref = 11;
+   */
+  registerRef: string
 }
 /**
  * ActorInvocation is a translation message between a local invocation made via InvocationRequest
@@ -509,6 +514,10 @@ export interface ActorInvocationResponse {
    * @generated from protobuf field: eigr.functions.protocol.Workflow workflow = 5;
    */
   workflow?: Workflow
+  /**
+   * @generated from protobuf field: bool checkpoint = 7;
+   */
+  checkpoint: boolean
 }
 /**
  * InvocationResponse is the response that the proxy that received the InvocationRequest request will forward to the request's original user function.
@@ -1858,7 +1867,8 @@ class InvocationRequest$Type extends MessageType<InvocationRequest> {
         T: 3 /*ScalarType.INT64*/,
         L: 0 /*LongType.BIGINT*/
       },
-      { no: 10, name: 'pooled', kind: 'scalar', T: 8 /*ScalarType.BOOL*/ }
+      { no: 10, name: 'pooled', kind: 'scalar', T: 8 /*ScalarType.BOOL*/ },
+      { no: 11, name: 'register_ref', kind: 'scalar', T: 9 /*ScalarType.STRING*/ }
     ])
   }
   create(value?: PartialMessage<InvocationRequest>): InvocationRequest {
@@ -1868,7 +1878,8 @@ class InvocationRequest$Type extends MessageType<InvocationRequest> {
       async: false,
       metadata: {},
       scheduledTo: 0n,
-      pooled: false
+      pooled: false,
+      registerRef: ''
     }
     globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this })
     if (value !== undefined) reflectionMergePartial<InvocationRequest>(this, message, value)
@@ -1940,6 +1951,9 @@ class InvocationRequest$Type extends MessageType<InvocationRequest> {
           break
         case /* bool pooled */ 10:
           message.pooled = reader.bool()
+          break
+        case /* string register_ref */ 11:
+          message.registerRef = reader.string()
           break
         default:
           let u = options.readUnknownField
@@ -2045,6 +2059,9 @@ class InvocationRequest$Type extends MessageType<InvocationRequest> {
     if (message.scheduledTo !== 0n) writer.tag(9, WireType.Varint).int64(message.scheduledTo)
     /* bool pooled = 10; */
     if (message.pooled !== false) writer.tag(10, WireType.Varint).bool(message.pooled)
+    /* string register_ref = 11; */
+    if (message.registerRef !== '')
+      writer.tag(11, WireType.LengthDelimited).string(message.registerRef)
     let u = options.writeUnknownFields
     if (u !== false) (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer)
     return writer
@@ -2212,11 +2229,17 @@ class ActorInvocationResponse$Type extends MessageType<ActorInvocationResponse> 
       { no: 3, name: 'updated_context', kind: 'message', T: () => Context },
       { no: 4, name: 'value', kind: 'message', oneof: 'payload', T: () => Any },
       { no: 6, name: 'noop', kind: 'message', oneof: 'payload', T: () => Noop },
-      { no: 5, name: 'workflow', kind: 'message', T: () => Workflow }
+      { no: 5, name: 'workflow', kind: 'message', T: () => Workflow },
+      { no: 7, name: 'checkpoint', kind: 'scalar', T: 8 /*ScalarType.BOOL*/ }
     ])
   }
   create(value?: PartialMessage<ActorInvocationResponse>): ActorInvocationResponse {
-    const message = { actorName: '', actorSystem: '', payload: { oneofKind: undefined } }
+    const message = {
+      actorName: '',
+      actorSystem: '',
+      payload: { oneofKind: undefined },
+      checkpoint: false
+    }
     globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this })
     if (value !== undefined) reflectionMergePartial<ActorInvocationResponse>(this, message, value)
     return message
@@ -2276,6 +2299,9 @@ class ActorInvocationResponse$Type extends MessageType<ActorInvocationResponse> 
             message.workflow
           )
           break
+        case /* bool checkpoint */ 7:
+          message.checkpoint = reader.bool()
+          break
         default:
           let u = options.readUnknownField
           if (u === 'throw')
@@ -2333,6 +2359,8 @@ class ActorInvocationResponse$Type extends MessageType<ActorInvocationResponse> 
         writer.tag(5, WireType.LengthDelimited).fork(),
         options
       ).join()
+    /* bool checkpoint = 7; */
+    if (message.checkpoint !== false) writer.tag(7, WireType.Varint).bool(message.checkpoint)
     let u = options.writeUnknownFields
     if (u !== false) (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer)
     return writer
