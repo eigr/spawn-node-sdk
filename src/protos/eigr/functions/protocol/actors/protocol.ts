@@ -227,12 +227,6 @@ export interface Broadcast {
    */
   channelGroup: string
   /**
-   * Action. Only Actors that have this action will run successfully
-   *
-   * @generated from protobuf field: string action_name = 2;
-   */
-  actionName: string
-  /**
    * @generated from protobuf oneof: payload
    */
   payload:
@@ -1474,13 +1468,12 @@ class Broadcast$Type extends MessageType<Broadcast> {
   constructor() {
     super('eigr.functions.protocol.Broadcast', [
       { no: 1, name: 'channel_group', kind: 'scalar', T: 9 /*ScalarType.STRING*/ },
-      { no: 2, name: 'action_name', kind: 'scalar', T: 9 /*ScalarType.STRING*/ },
       { no: 3, name: 'value', kind: 'message', oneof: 'payload', T: () => Any },
       { no: 4, name: 'noop', kind: 'message', oneof: 'payload', T: () => Noop }
     ])
   }
   create(value?: PartialMessage<Broadcast>): Broadcast {
-    const message = { channelGroup: '', actionName: '', payload: { oneofKind: undefined } }
+    const message = { channelGroup: '', payload: { oneofKind: undefined } }
     globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this })
     if (value !== undefined) reflectionMergePartial<Broadcast>(this, message, value)
     return message
@@ -1498,9 +1491,6 @@ class Broadcast$Type extends MessageType<Broadcast> {
       switch (fieldNo) {
         case /* string channel_group */ 1:
           message.channelGroup = reader.string()
-          break
-        case /* string action_name */ 2:
-          message.actionName = reader.string()
           break
         case /* google.protobuf.Any value */ 3:
           message.payload = {
@@ -1551,9 +1541,6 @@ class Broadcast$Type extends MessageType<Broadcast> {
     /* string channel_group = 1; */
     if (message.channelGroup !== '')
       writer.tag(1, WireType.LengthDelimited).string(message.channelGroup)
-    /* string action_name = 2; */
-    if (message.actionName !== '')
-      writer.tag(2, WireType.LengthDelimited).string(message.actionName)
     /* google.protobuf.Any value = 3; */
     if (message.payload.oneofKind === 'value')
       Any.internalBinaryWrite(

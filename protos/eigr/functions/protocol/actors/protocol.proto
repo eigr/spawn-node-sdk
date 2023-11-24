@@ -277,9 +277,6 @@ message Broadcast {
     // Channel of target Actors
     string channel_group = 1;
 
-    // Action. Only Actors that have this action will run successfully
-    string action_name = 2;
-
     // Payload
     oneof payload {
         google.protobuf.Any value = 3;

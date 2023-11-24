@@ -11,7 +11,6 @@ export type ActorContext<T> = {
 
 export type Broadcast = {
   channel: string
-  action?: string
   payload: PayloadRef<any> | { [key: number | string]: any }
 }
 
@@ -19,6 +18,7 @@ export type Effect = {
   actorName: string
   action: string
   payload: PayloadRef<any> | { [key: number | string]: any }
+  ref?: string
   scheduledTo?: Date | number
 }
 

@@ -87,7 +87,6 @@ export const buildBroadcast = (broadcast: Broadcast | undefined): BroadcastProto
 
   return BroadcastProto.create({
     channelGroup: broadcast.channel,
-    actionName: broadcast.action,
     payload: buildPayload(broadcast.payload)
   })
 }
@@ -108,7 +107,8 @@ export const buildSideEffects = (callerName: string, system: string, effects?: E
       caller: ActorId.create({ name: callerName, system }),
       scheduledTo: scheduledToBigInt(
         parseScheduledTo(effect.scheduledTo as number, effect.scheduledTo as Date)
-      )
+      ),
+      registerRef: effect.ref
     })
 
     return SideEffect.create({ request })

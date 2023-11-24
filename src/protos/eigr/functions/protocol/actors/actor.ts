@@ -149,24 +149,42 @@ export interface ActorState {
   state?: Any
 }
 /**
- * TODO doc here
+ * Metadata represents a set of key-value pairs that can be used to
+ * provide additional information about an Actor.
  *
  * @generated from protobuf message eigr.functions.protocol.actors.Metadata
  */
 export interface Metadata {
   /**
    * A channel group represents a way to send actions to various actors
-   * that belong to a certain semantic group.
+   * that belong to a certain semantic group. Following the Pub-Sub pattern.
    *
-   * @generated from protobuf field: string channel_group = 1;
+   * @generated from protobuf field: repeated eigr.functions.protocol.actors.Channel channel_group = 1;
    */
-  channelGroup: string
+  channelGroup: Channel[]
   /**
    * @generated from protobuf field: map<string, string> tags = 2;
    */
   tags: {
     [key: string]: string
   }
+}
+/**
+ * Represents a Pub-Sub binding, where a actor can be subscribed to a channel
+ * and map a specific action to a specific topic if necessary
+ * if the action is not informed, the default action will be "receive".
+ *
+ * @generated from protobuf message eigr.functions.protocol.actors.Channel
+ */
+export interface Channel {
+  /**
+   * @generated from protobuf field: string topic = 1;
+   */
+  topic: string
+  /**
+   * @generated from protobuf field: string action = 2;
+   */
+  action: string
 }
 /**
  * @generated from protobuf message eigr.functions.protocol.actors.ActorSettings
@@ -976,7 +994,13 @@ export const ActorState = new ActorState$Type()
 class Metadata$Type extends MessageType<Metadata> {
   constructor() {
     super('eigr.functions.protocol.actors.Metadata', [
-      { no: 1, name: 'channel_group', kind: 'scalar', T: 9 /*ScalarType.STRING*/ },
+      {
+        no: 1,
+        name: 'channel_group',
+        kind: 'message',
+        repeat: 1 /*RepeatType.PACKED*/,
+        T: () => Channel
+      },
       {
         no: 2,
         name: 'tags',
@@ -987,7 +1011,7 @@ class Metadata$Type extends MessageType<Metadata> {
     ])
   }
   create(value?: PartialMessage<Metadata>): Metadata {
-    const message = { channelGroup: '', tags: {} }
+    const message = { channelGroup: [], tags: {} }
     globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this })
     if (value !== undefined) reflectionMergePartial<Metadata>(this, message, value)
     return message
@@ -1003,8 +1027,8 @@ class Metadata$Type extends MessageType<Metadata> {
     while (reader.pos < end) {
       let [fieldNo, wireType] = reader.tag()
       switch (fieldNo) {
-        case /* string channel_group */ 1:
-          message.channelGroup = reader.string()
+        case /* repeated eigr.functions.protocol.actors.Channel channel_group */ 1:
+          message.channelGroup.push(Channel.internalBinaryRead(reader, reader.uint32(), options))
           break
         case /* map<string, string> tags */ 2:
           this.binaryReadMap2(message.tags, reader, options)
@@ -1059,9 +1083,13 @@ class Metadata$Type extends MessageType<Metadata> {
     writer: IBinaryWriter,
     options: BinaryWriteOptions
   ): IBinaryWriter {
-    /* string channel_group = 1; */
-    if (message.channelGroup !== '')
-      writer.tag(1, WireType.LengthDelimited).string(message.channelGroup)
+    /* repeated eigr.functions.protocol.actors.Channel channel_group = 1; */
+    for (let i = 0; i < message.channelGroup.length; i++)
+      Channel.internalBinaryWrite(
+        message.channelGroup[i],
+        writer.tag(1, WireType.LengthDelimited).fork(),
+        options
+      ).join()
     /* map<string, string> tags = 2; */
     for (let k of Object.keys(message.tags))
       writer
@@ -1081,6 +1109,74 @@ class Metadata$Type extends MessageType<Metadata> {
  * @generated MessageType for protobuf message eigr.functions.protocol.actors.Metadata
  */
 export const Metadata = new Metadata$Type()
+// @generated message type with reflection information, may provide speed optimized methods
+class Channel$Type extends MessageType<Channel> {
+  constructor() {
+    super('eigr.functions.protocol.actors.Channel', [
+      { no: 1, name: 'topic', kind: 'scalar', T: 9 /*ScalarType.STRING*/ },
+      { no: 2, name: 'action', kind: 'scalar', T: 9 /*ScalarType.STRING*/ }
+    ])
+  }
+  create(value?: PartialMessage<Channel>): Channel {
+    const message = { topic: '', action: '' }
+    globalThis.Object.defineProperty(message, MESSAGE_TYPE, { enumerable: false, value: this })
+    if (value !== undefined) reflectionMergePartial<Channel>(this, message, value)
+    return message
+  }
+  internalBinaryRead(
+    reader: IBinaryReader,
+    length: number,
+    options: BinaryReadOptions,
+    target?: Channel
+  ): Channel {
+    let message = target ?? this.create(),
+      end = reader.pos + length
+    while (reader.pos < end) {
+      let [fieldNo, wireType] = reader.tag()
+      switch (fieldNo) {
+        case /* string topic */ 1:
+          message.topic = reader.string()
+          break
+        case /* string action */ 2:
+          message.action = reader.string()
+          break
+        default:
+          let u = options.readUnknownField
+          if (u === 'throw')
+            throw new globalThis.Error(
+              `Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`
+            )
+          let d = reader.skip(wireType)
+          if (u !== false)
+            (u === true ? UnknownFieldHandler.onRead : u)(
+              this.typeName,
+              message,
+              fieldNo,
+              wireType,
+              d
+            )
+      }
+    }
+    return message
+  }
+  internalBinaryWrite(
+    message: Channel,
+    writer: IBinaryWriter,
+    options: BinaryWriteOptions
+  ): IBinaryWriter {
+    /* string topic = 1; */
+    if (message.topic !== '') writer.tag(1, WireType.LengthDelimited).string(message.topic)
+    /* string action = 2; */
+    if (message.action !== '') writer.tag(2, WireType.LengthDelimited).string(message.action)
+    let u = options.writeUnknownFields
+    if (u !== false) (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer)
+    return writer
+  }
+}
+/**
+ * @generated MessageType for protobuf message eigr.functions.protocol.actors.Channel
+ */
+export const Channel = new Channel$Type()
 // @generated message type with reflection information, may provide speed optimized methods
 class ActorSettings$Type extends MessageType<ActorSettings> {
   constructor() {

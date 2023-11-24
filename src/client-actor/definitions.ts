@@ -4,6 +4,7 @@ import {
   ActorId,
   ActorSnapshotStrategy,
   ActorState,
+  Channel,
   Kind,
   Metadata,
   TimeoutStrategy
@@ -22,7 +23,7 @@ export type IActorOpts = {
   stateful?: boolean
   snapshotTimeout?: bigint
   deactivatedTimeout?: bigint
-  channel?: string
+  channels?: Array<string | Channel>
   tags?: { [key: string]: string }
 }
 
@@ -71,7 +72,16 @@ export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
     }
   }
 
-  const metadata: Metadata = { channelGroup: opts.channel!, tags: {} }
+  const channelGroup =
+    opts.channels?.map((channel) => {
+      if (typeof channel === 'string') {
+        return Channel.create({ topic: channel, action: 'receive' })
+      }
+
+      return channel
+    }) || []
+
+  const metadata: Metadata = { channelGroup, tags: {} }
   const id = { name: opts.name, system } as ActorId
 
   if (opts.kind === Kind.NAMED) {

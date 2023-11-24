@@ -36,7 +36,7 @@ export function startServer(actorCallbacks: Map<string, ActorCallbackConnector>)
 
       sendResponse(404, res)
     }),
-    process.env.NODE_ENV === 'prod' ? Infinity : 1_000
+    process.env.NODE_ENV === 'prod' ? 30_000 : 1_000
   )
 
   server.listen(getActionPort(), () => {

@@ -94,7 +94,6 @@ export const createUserActor = (system: SpawnSystem) => {
       .state({ name: 'broadcastInitial' })
       .broadcast({
         channel: 'broadcast_test',
-        action: 'broadcastReceiver',
         payload: payloadFor(Noop, {})
       })
   })
@@ -185,12 +184,12 @@ export const createRandomActor = (system: SpawnSystem, actorName: string) => {
     name: actorName,
     stateType: UserState,
     stateful: true,
-    channel: 'broadcast_test',
+    channels: ['broadcast_test'],
     snapshotTimeout: 10_000n,
     deactivatedTimeout: 500_000n
   })
 
-  actor.addAction({ name: 'broadcastReceiver', payloadType: Noop }, async () =>
+  actor.addAction({ name: 'receive', payloadType: Noop }, async () =>
     Value.of().state({ name: 'afterBroadcast' })
   )
 
