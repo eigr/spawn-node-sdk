@@ -24,7 +24,7 @@ version: "3.8"
 
 services:
   spawn-proxy:
-    image: eigr/spawn-proxy:1.0.0-rc16
+    image: eigr/spawn-proxy:1.0.0
     restart: always
     environment:
       PROXY_APP_NAME: spawn
@@ -157,7 +157,7 @@ import { UserState, ChangeUserNamePayload, ChangeUserNameResponse } from 'src/pr
 
 You can check [test folder](./test) to see some examples
 
-## **Environment variables:**
+## **Environment variables:** (you don't need to worry if you are using spawn proxy)
 
 - `PROXY_HTTP_PORT` This is the port of spawn proxy service
 - `PROXY_HTTP_HOST` This is the host of spawn proxy service
