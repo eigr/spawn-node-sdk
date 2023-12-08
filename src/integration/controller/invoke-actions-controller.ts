@@ -69,27 +69,33 @@ export const registerControllerHandler = (
       finalPayload = payloadType.fromBinary(payloadToUnpack.value)
     }
 
-    const value = await callback(context, finalPayload)
-    const parsedValue = value.parse()
+    try {
+      const value = await callback(context, finalPayload)
+      const parsedValue = value.parse()
 
-    const response = ActorInvocationResponse.create({
-      actorName: actor?.name,
-      actorSystem: actor?.system,
-      updatedContext: Context.create({
-        caller: caller,
-        self: actor,
-        metadata: currentContext?.metadata,
-        tags: parsedValue.tags || currentContext!.tags || {},
-        state: parsedValue.state ? pack(parsedValue.state, stateType) : currentContext!.state
-      }),
-      payload: buildPayload(parsedValue.value),
-      workflow: {
-        broadcast: buildBroadcast(parsedValue?.broadcast),
-        effects: buildSideEffects(actor!.name, actor!.system, parsedValue.effects),
-        routing: buildRoutingWorkflow(parsedValue?.pipe, parsedValue?.forward)
-      }
-    })
+      const response = ActorInvocationResponse.create({
+        actorName: actor?.name,
+        actorSystem: actor?.system,
+        updatedContext: Context.create({
+          caller: caller,
+          self: actor,
+          metadata: currentContext?.metadata,
+          tags: parsedValue.tags || currentContext!.tags || {},
+          state: parsedValue.state ? pack(parsedValue.state, stateType) : currentContext!.state
+        }),
+        payload: buildPayload(parsedValue.value),
+        workflow: {
+          broadcast: buildBroadcast(parsedValue?.broadcast),
+          effects: buildSideEffects(actor!.name, actor!.system, parsedValue.effects),
+          routing: buildRoutingWorkflow(parsedValue?.pipe, parsedValue?.forward)
+        }
+      })
 
-    sendResponse(200, res, response)
+      sendResponse(200, res, response)
+    } catch (error) {
+      console.error(error)
+
+      sendResponse(400, res)
+    }
   })
 }

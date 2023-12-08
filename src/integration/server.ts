@@ -7,7 +7,7 @@ import stoppable = require('stoppable')
 export function sendResponse(status: number, res: ServerResponse, resp: any = null) {
   if (status !== 200 || !resp) {
     res.writeHead(status, {})
-    res.write([])
+    res.write('')
     res.end()
 
     return
