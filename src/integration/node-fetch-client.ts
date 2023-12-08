@@ -9,10 +9,10 @@ import {
   SpawnResponse
 } from '../protos/eigr/functions/protocol/actors/protocol'
 import { SpawnActorError, SpawnInvocationError, SpawnRegisterError } from './errors'
-import fetch from 'node-fetch'
+import fetch from 'node-fetch-native'
 
 const getProxyUrl = () =>
-  `http://${process.env.PROXY_HTTP_HOST || 'localhost'}:${process.env.PROXY_HTTP_PORT || 9001}`
+  `http://${process.env.PROXY_HTTP_HOST || '127.0.0.1'}:${process.env.PROXY_HTTP_PORT || 9001}`
 
 export async function registerRequest(
   registration: RegistrationRequest
@@ -28,7 +28,7 @@ export async function registerRequest(
     body
   })
 
-  const response = RegistrationResponse.fromBinary(await res.buffer())
+  const response = RegistrationResponse.fromBinary(Buffer.from(await res.arrayBuffer()))
   const responseStatus = response.status as RequestStatus
 
   if (responseStatus?.status && responseStatus?.status !== Status.OK) {
@@ -55,7 +55,7 @@ export async function invokeRequest(request: InvocationRequest): Promise<Invocat
     }
   )
 
-  const response = InvocationResponse.fromBinary(await res.buffer())
+  const response = InvocationResponse.fromBinary(Buffer.from(await res.arrayBuffer()))
   const responseStatus = response.status as RequestStatus
 
   if (responseStatus?.status && responseStatus?.status !== Status.OK) {
@@ -80,7 +80,7 @@ export async function spawnActorRequest(request: SpawnRequest): Promise<SpawnRes
     }
   )
 
-  const response = SpawnResponse.fromBinary(await res.buffer())
+  const response = SpawnResponse.fromBinary(Buffer.from(await res.arrayBuffer()))
   const responseStatus = response.status as RequestStatus
 
   if (responseStatus?.status && responseStatus?.status !== Status.OK) {

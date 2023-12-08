@@ -12,7 +12,7 @@ import { ActorContext } from '../src/client-actor/workflows'
 
 const randomActorName = crypto.randomBytes(16).toString('hex')
 
-const system = spawn.createSystem('spawn_sys_bench')
+const system = spawn.createSystem('SpawnSysTest')
 
 ;(async () => {
   const actor = system.buildActor({

@@ -1,92 +1,20 @@
 # [Spawn](https://github.com/eigr/spawn)
 
-**Actor model framework for NodeJS**
+**Actor model framework for Node/Bun**
 
 ## **Installation**
-
-Currently, this framework has a direct dependency of [@protobuf-ts](https://github.com/timostamm/protobuf-ts)
 
 ```
 yarn add @eigr/spawn-sdk
 ```
 
-## **Getting Started**
+# **Getting Started**
 
-_We recommend you to use typescript for better usage overall._
+_We recommend you to use Typescript for better usage overall._
 
-You'll need to make sure Spawn Proxy service is up and running.
-With `docker-compose` you can define:
+This lib supports both Bun and NodeJS runtimes, Bun performs ~2x faster.
 
-> **_NOTE:_** _using docker is recommended for `dev purposes only`, see [spawn deploy](https://github.com/eigr/spawn#getting-started) for production examples._
-
-```YML
-version: "3.8"
-
-services:
-  spawn-proxy:
-    image: eigr/spawn-proxy:1.0.0
-    restart: always
-    environment:
-      PROXY_APP_NAME: spawn
-      PROXY_HTTP_PORT: 9001
-      PROXY_DATABASE_TYPE: postgres
-      PROXY_DATABASE_NAME: eigr-functions-db
-      PROXY_DATABASE_USERNAME: postgres
-      PROXY_DATABASE_SECRET: password
-      PROXY_DATABASE_HOST: localhost
-      PROXY_DATABASE_PORT: 5432
-      SPAWN_STATESTORE_KEY: 3Jnb0hZiHIzHTOih7t2cTEPEpY98Tu1wvQkPfq/XwqE=
-      USER_FUNCTION_HOST: 0.0.0.0 # Your NodeJS runtime host
-      USER_FUNCTION_PORT: 8090 # Your NodeJS runtime exposed port
-      SPAWN_SUPERVISORS_STATE_HANDOFF_CONTROLLER: "crdt"
-      PROXY_ACTOR_SYSTEM_NAME: "spawn-system" # change this to the system you've registered
-    # network_mode: host # only uncomment this if you're running your nodejs locally in Linux, check note below for Windows
-    ports:
-      - "9001:9001"
-```
-
-> **NOTE:** `Windows w/ WSL2` - If you want to use docker for spawn-proxy and local host for your NodeJS check this article https://www.beyondjava.net/docker-wsl-network
-
-Set the following ENV variables for your NodeJS runtime (following .env.example)
-
-```bash
-PROXY_HTTP_PORT=9001
-PROXY_HTTP_HOST=localhost
-USER_FUNCTION_PORT=8090
-```
-
-Define a protobuf file (lets save this at `protos/examples/user_example.proto`), if you want to skip this part, you can use 'json' type actors.
-
-```proto
-syntax = "proto3";
-
-message UserState {
-  string name = 1;
-}
-
-message ChangeUserNamePayload {
-  string new_name = 1;
-}
-
-enum ChangeUserNameStatus {
-  NAME_ALREADY_TAKEN = 0;
-  OK = 1;
-}
-
-message ChangeUserNameResponse {
-  ChangeUserNameStatus status = 1;
-}
-```
-
-Compile proto with protoc using [ts-protoc-gen](https://github.com/improbable-eng/ts-protoc-gen):
-
-```BASH
-protoc --ts_out ./src/protos/ --proto_path protos protos/**/*.proto
-```
-
-With this, it should generate a file at `src/protos/examples/user_example.ts`, we will use this generated module for Actor definitions and invocations.
-
-Now, in your `index.ts` file declare:
+## Basic Usage
 
 ```TS
 import spawn, { ActorContext, Value } from '@eigr/spawn-sdk'
@@ -143,12 +71,88 @@ import { UserState, ChangeUserNamePayload, ChangeUserNameResponse } from 'src/pr
 })()
 ```
 
+## Using protobufs
+
+> **_NOTE:_** _Its recommended to use Protobufs to ensure your contracts will always be what you expect and also for performance improvements_
+
+Define a protobuf file (lets save this at `protos/examples/user_example.proto`), if you want to skip this part, you can use 'json' type actors.
+
+```proto
+syntax = "proto3";
+
+message UserState {
+  string name = 1;
+}
+
+message ChangeUserNamePayload {
+  string new_name = 1;
+}
+
+enum ChangeUserNameStatus {
+  NAME_ALREADY_TAKEN = 0;
+  OK = 1;
+}
+
+message ChangeUserNameResponse {
+  ChangeUserNameStatus status = 1;
+}
+```
+
+Compile proto with protoc using [ts-protoc-gen](https://github.com/improbable-eng/ts-protoc-gen):
+
+```BASH
+protoc --ts_out ./src/protos/ --proto_path protos protos/**/*.proto
+```
+
+With this, it should generate a file at `src/protos/examples/user_example.ts`, we will use this generated module for Actor definitions and invocations.
+
+## Running the Proxy
+
+You'll need to make sure Spawn Proxy service is up and running.
+With `docker-compose` you can define:
+
+> **_NOTE:_** _using docker is recommended for `dev purposes only`, see [spawn deploy](https://github.com/eigr/spawn#getting-started) for production examples._
+
+```YML
+version: "3.8"
+
+services:
+  spawn-proxy:
+    image: eigr/spawn-proxy:1.0.1
+    restart: always
+    environment:
+      PROXY_APP_NAME: spawn-typescript
+      PROXY_HTTP_PORT: 9001
+      PROXY_DATABASE_TYPE: postgres
+      PROXY_DATABASE_NAME: eigr-functions-db
+      PROXY_DATABASE_USERNAME: postgres
+      PROXY_DATABASE_SECRET: password
+      PROXY_DATABASE_HOST: localhost
+      PROXY_DATABASE_PORT: 5432
+      SPAWN_STATESTORE_KEY: 3Jnb0hZiHIzHTOih7t2cTEPEpY98Tu1wvQkPfq/XwqE=
+      USER_FUNCTION_HOST: 0.0.0.0 # Your NodeJS runtime host
+      USER_FUNCTION_PORT: 8090 # Your NodeJS runtime exposed port
+      PROXY_ACTOR_SYSTEM_NAME: "spawn-system" # change this to the system you've registered
+    network_mode: host # only uncomment this if you're running your nodejs locally in Linux, check note below for Windows
+    ports:
+      - "9001:9001"
+```
+
+> **NOTE:** `Windows w/ WSL2` - If you want to use docker for spawn-proxy and local host for your NodeJS check this article https://www.beyondjava.net/docker-wsl-network
+
+Set the following ENV variables for your NodeJS runtime (following .env.example)
+
+```bash
+PROXY_HTTP_PORT=9001
+PROXY_HTTP_HOST=localhost
+USER_FUNCTION_PORT=8090
+```
+
 ## **Documentation**
 
 - [Actor options](./documentation/actor-options.md)
   - [Unamed](./documentation/actor-options.md#unamed-actor)
   - [Named](./documentation/actor-options.md#named-actor)
-  - [Pooled](./documentation/actor-options.md#pooled-actor)
   - [Default Actions](./documentation/actor-options.md#default-actions)
 - [Actor workflows](./documentation/actor-workflows.md)
 - [Invocations](./documentation/invocations.md)
