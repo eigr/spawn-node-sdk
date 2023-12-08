@@ -1,7 +1,7 @@
 {
   "name": "@eigr/spawn-sdk",
-  "version": "1.1.1",
-  "description": "Spawn Actor model framework implementation for NodeJS",
+  "version": "1.1.2",
+  "description": "Spawn Actor model framework implementation for NodeJS/Bun",
   "main": "_build/index.js",
   "types": "_build/index.d.ts",
   "scope": "@eigr",
