@@ -54,11 +54,11 @@ export type SpawnSystem = {
   /**
    * Builds an actor for this system with the following default options:
    *
-   * - kind: UNAMED
+   * - kind: UNNAMED
    * - stateType: 'json'
    * - stateful: true
-   * - snapshotTimeout: 10_000n
-   * - deactivatedTimeout: 2_000n
+   * - snapshotTimeout: 3_000n
+   * - deactivatedTimeout: 10_000n
    *
    * @param {ActorOpts} opts - options for creating the actor
    */

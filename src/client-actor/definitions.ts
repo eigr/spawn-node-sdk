@@ -37,11 +37,11 @@ export type PooledActorOpts = IActorOpts & {
 export type ActorOpts = IActorOpts | PooledActorOpts
 
 export const defaultActorOpts = {
-  kind: Kind.UNAMED,
+  kind: Kind.UNNAMED,
   stateType: 'json',
   stateful: true,
-  snapshotTimeout: 10_000n,
-  deactivatedTimeout: 2_000n
+  snapshotTimeout: 3_000n,
+  deactivatedTimeout: 10_000n
 } as ActorOpts
 
 export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {

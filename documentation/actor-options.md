@@ -2,9 +2,9 @@
 
 This is an example of what kind of Actors you can create with Spawn
 
-## Unamed Actor
+## Unnamed Actor
 
-In this example we are creating an actor in a Unamed way, that is, it is a known actor at compile time.
+In this example we are creating an actor in a Unnamed way, that is, it is a known actor at compile time.
 
 ```TS
 import spawn, { ActorContext, Kind, Value } from '@eigr/spawn-sdk'
@@ -14,9 +14,9 @@ const system = spawn.createSystem()
 
 // You can register multiple actors with different options
 const actor = system.buildActor({
-  name: 'unamedActorExample',
+  name: 'unnamedActorExample',
   stateType: UserState,
-  kind: Kind.UNAMED,
+  kind: Kind.UNNAMED,
   stateful: true,
   snapshotTimeout: 10_000n,
   deactivatedTimeout: 60_000n
@@ -42,7 +42,7 @@ It can be invoked with:
 import spawn, { payloadFor } from '@eigr/spawn-sdk'
 import { ChangeUserNamePayload, ChangeUserNameResponse } from 'src/protos/examples/user_example'
 
-spawn.invoke('unamedActorExample', {
+spawn.invoke('unnamedActorExample', {
   action: 'setName',
   response: ChangeUserNameResponse,
   payload: payloadFor(ChangeUserNamePayload, { newName: 'newName for actor' })
