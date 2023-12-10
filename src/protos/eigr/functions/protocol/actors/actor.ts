@@ -244,7 +244,7 @@ export interface ActorId {
    */
   system: string
   /**
-   * When the Actor is of the Unamed type,
+   * When the Actor is of the Unnamed type,
    * the name of the parent Actor must be informed here.
    *
    * @generated from protobuf field: string parent = 3;
@@ -313,14 +313,14 @@ export enum Kind {
    */
   NAMED = 1,
   /**
-   * UNAMED actors as the name suggests have only one real instance of themselves running
+   * UNNAMED actors as the name suggests have only one real instance of themselves running
    * during their entire lifecycle. That is, they are the opposite of the NAMED type Actors.
    *
-   * @generated from protobuf enum value: UNAMED = 2;
+   * @generated from protobuf enum value: UNNAMED = 2;
    */
-  UNAMED = 2,
+  UNNAMED = 2,
   /**
-   * Pooled Actors are similar to Unamed actors, but unlike them,
+   * Pooled Actors are similar to Unnamed actors, but unlike them,
    * their identifying name will always be the one registered at the system initialization stage.
    * The great advantage of Pooled actors is that they have multiple instances of themselves
    * acting as a request service pool.

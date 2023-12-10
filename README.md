@@ -151,7 +151,7 @@ USER_FUNCTION_PORT=8090
 ## **Documentation**
 
 - [Actor options](./documentation/actor-options.md)
-  - [Unamed](./documentation/actor-options.md#unamed-actor)
+  - [Unnamed](./documentation/actor-options.md#unnamed-actor)
   - [Named](./documentation/actor-options.md#named-actor)
   - [Default Actions](./documentation/actor-options.md#default-actions)
 - [Actor workflows](./documentation/actor-workflows.md)
