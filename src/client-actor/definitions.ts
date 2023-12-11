@@ -37,7 +37,7 @@ export type PooledActorOpts = IActorOpts & {
 export type ActorOpts = IActorOpts | PooledActorOpts
 
 export const defaultActorOpts = {
-  kind: Kind.UNNAMED,
+  kind: Kind.NAMED,
   stateType: 'json',
   stateful: true,
   snapshotTimeout: 3_000n,
@@ -84,7 +84,7 @@ export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
   const metadata: Metadata = { channelGroup, tags: {} }
   const id = { name: opts.name, system } as ActorId
 
-  if (opts.kind === Kind.NAMED) {
+  if (opts.kind === Kind.UNNAMED) {
     id.parent = opts.name
   }
 

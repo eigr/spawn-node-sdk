@@ -1,14 +1,14 @@
 import { ChangeUserNameStatus, ChangeUserNameResponse, ChangeUserName } from './protos/user_test'
 import spawn, { payloadFor, SpawnSystem } from '../src/spawn'
-import { createNamedActor } from './stubs/actors'
+import { createUnnamedActor } from './stubs/actors'
 
-describe('testing spawn named actor', () => {
+describe('testing spawn unnamed actor', () => {
   let system: SpawnSystem
 
   beforeAll(async () => {
     system = spawn.createSystem('SpawnSysTest')
 
-    createNamedActor(system)
+    createUnnamedActor(system)
 
     const registered = await system.register()
     expect(registered.status?.message).toBe('Accepted')

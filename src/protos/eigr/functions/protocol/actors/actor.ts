@@ -307,14 +307,14 @@ export enum Kind {
    */
   UNKNOW_KIND = 0,
   /**
-   * NAMED actors are used to create children of this based actor at runtime
+   * NAMED actors as the name suggests have only one real instance of themselves running
+   * during their entire lifecycle. That is, they are the opposite of the UNNAMED type Actors.
    *
    * @generated from protobuf enum value: NAMED = 1;
    */
   NAMED = 1,
   /**
-   * UNNAMED actors as the name suggests have only one real instance of themselves running
-   * during their entire lifecycle. That is, they are the opposite of the NAMED type Actors.
+   * UNNAMED actors are used to create children of this based actor at runtime
    *
    * @generated from protobuf enum value: UNNAMED = 2;
    */

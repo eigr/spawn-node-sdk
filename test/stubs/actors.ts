@@ -196,10 +196,10 @@ export const createRandomActor = (system: SpawnSystem, actorName: string) => {
   return actor
 }
 
-export const createNamedActor = (system: SpawnSystem) => {
+export const createUnnamedActor = (system: SpawnSystem) => {
   const actor = system.buildActor({
-    name: 'namedActorTest',
-    kind: Kind.NAMED,
+    name: 'unnamedActorTest',
+    kind: Kind.UNNAMED,
     stateType: UserState,
     stateful: true
   })
