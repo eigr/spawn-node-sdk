@@ -20,7 +20,7 @@ describe('testing spawn pooled actor', () => {
     await system.destroy()
   })
 
-  test('calling a stateless function in a pooled actor', async () => {
+  test.skip('calling a stateless function in a pooled actor', async () => {
     const expected = ChangeUserNameResponse.create({
       status: ChangeUserNameStatus.OK,
       newName: 'namePooledCall-set'

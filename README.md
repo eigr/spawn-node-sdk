@@ -8,11 +8,13 @@
 yarn add @eigr/spawn-sdk
 ```
 
+_This package depends on `@protobuf-ts/plugin` to work with protobufs_
+
 # **Getting Started**
 
 _We recommend you to use Typescript for better usage overall._
 
-This lib supports both Bun and NodeJS runtimes, Bun performs ~2x faster.
+This lib supports both Bun and NodeJS runtimes, Bun performs invocations ~2x faster, we recommend using Bun.
 
 ## Basic Usage
 
@@ -118,9 +120,10 @@ version: "3.8"
 
 services:
   spawn-proxy:
-    image: eigr/spawn-proxy:1.0.1
+    image: eigr/spawn-proxy:1.1.0
     restart: always
     environment:
+      PROXY_ACTOR_SYSTEM_NAME: "spawn-system" # change this to the system you've registered
       PROXY_APP_NAME: spawn-typescript
       PROXY_HTTP_PORT: 9001
       PROXY_DATABASE_TYPE: postgres
@@ -132,8 +135,7 @@ services:
       SPAWN_STATESTORE_KEY: 3Jnb0hZiHIzHTOih7t2cTEPEpY98Tu1wvQkPfq/XwqE=
       USER_FUNCTION_HOST: 0.0.0.0 # Your NodeJS runtime host
       USER_FUNCTION_PORT: 8090 # Your NodeJS runtime exposed port
-      PROXY_ACTOR_SYSTEM_NAME: "spawn-system" # change this to the system you've registered
-    network_mode: host # only uncomment this if you're running your nodejs locally in Linux, check note below for Windows
+    network_mode: host
     ports:
       - "9001:9001"
 ```

@@ -21,7 +21,7 @@ describe('testing spawn unnamed actor', () => {
   test('settting new name for a named actor', async () => {
     await spawn.spawnActor('namedActorTest_01', {
       system: 'SpawnSysTest',
-      actorRef: 'namedActorTest'
+      actorRef: 'unnamedActorTest'
     })
 
     const expected = ChangeUserNameResponse.create({
@@ -56,7 +56,7 @@ describe('testing spawn unnamed actor', () => {
       action,
       payload,
       response: ChangeUserNameResponse,
-      ref: 'namedActorTest',
+      ref: 'unnamedActorTest',
       system: 'SpawnSysTest'
     })
 
