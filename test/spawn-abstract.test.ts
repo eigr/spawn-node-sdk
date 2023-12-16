@@ -12,7 +12,7 @@ describe('testing spawn unnamed actor', () => {
     createUnnamedActor(system)
 
     const registered = await system.register()
-    expect(registered.status?.message).toBe('Accepted')
+    if (registered.status?.message != 'Accepted') throw new Error('Failed to register system')
   })
 
   afterAll(async () => {

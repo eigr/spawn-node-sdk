@@ -10,8 +10,6 @@ import { createRandomActor, createUserActor } from './stubs/actors'
 import { describe, beforeAll, afterAll, test, expect } from 'bun:test'
 
 describe('testing invoke', () => {
-  // jest.setTimeout(120_000)
-
   const randomActorName = crypto.randomUUID()
   let system: SpawnSystem
 
@@ -22,7 +20,7 @@ describe('testing invoke', () => {
     createRandomActor(system, randomActorName)
 
     const registered = await system.register()
-    expect(registered.status?.message).toBe('Accepted')
+    if (registered.status?.message != 'Accepted') throw new Error('Failed to register system')
   })
 
   afterAll(async () => {

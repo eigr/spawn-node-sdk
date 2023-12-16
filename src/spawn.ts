@@ -24,7 +24,7 @@ import {
   scheduledToBigInt,
   unpackPayload
 } from './integration/parsers'
-import { startServer } from './integration/server'
+import { startServer, stopServer } from './integration/server'
 import { MessageType } from '@protobuf-ts/runtime'
 import { Value } from './client-actor/value'
 
@@ -228,14 +228,9 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
       return doRegister()
     },
     destroy: async () => {
-      return new Promise((resolve, reject) => {
-        server.stop((err: any) => {
-          if (err) return reject()
-
-          registered = false
-          systemCreated = false
-          resolve(true)
-        })
+      return stopServer(server).then(() => {
+        registered = false
+        systemCreated = false
       })
     }
   }

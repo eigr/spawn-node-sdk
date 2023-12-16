@@ -9,8 +9,6 @@ function timeout(ms: number) {
 }
 
 describe('testing workflows', () => {
-  // jest.setTimeout(5_000)
-
   const randomActorName = crypto.randomUUID()
   let system: SpawnSystem
 
@@ -21,7 +19,7 @@ describe('testing workflows', () => {
     createRandomActor(system, randomActorName)
 
     const registered = await system.register()
-    expect(registered.status?.message).toBe('Accepted')
+    if (registered.status?.message != 'Accepted') throw new Error('Failed to register system')
   })
 
   afterAll(async () => {

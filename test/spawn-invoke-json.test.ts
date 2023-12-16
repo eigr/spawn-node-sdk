@@ -3,8 +3,6 @@ import { createJsonActor } from './stubs/actors'
 import { describe, beforeAll, afterAll, test, expect } from 'bun:test'
 
 describe('testing invoke', () => {
-  // jest.setTimeout(30_000)
-
   let system: SpawnSystem
 
   beforeAll(async () => {
@@ -13,7 +11,7 @@ describe('testing invoke', () => {
     createJsonActor(system)
 
     const registered = await system.register()
-    expect(registered.status?.message).toBe('Accepted')
+    if (registered.status?.message != 'Accepted') throw new Error('Failed to register system')
   })
 
   afterAll(async () => {

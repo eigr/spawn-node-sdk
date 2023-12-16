@@ -68,7 +68,6 @@ async function register(
   }
 
   try {
-    console.log('callback?')
     const value = await callback(context, finalPayload)
     const parsedValue = value.parse()
 
@@ -109,8 +108,8 @@ export const registerControllerHandlerNode = (
 export const registerControllerHandlerBun = async (
   req: Request,
   actorCallbacks: Map<string, ActorCallbackConnector>
-) => {
+): Promise<Response> => {
   const buffer = Buffer.from(await req.arrayBuffer())
 
-  return register(buffer, actorCallbacks, null)
+  return register(buffer, actorCallbacks, null) as Promise<Response>
 }

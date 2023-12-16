@@ -5,7 +5,6 @@ import {
   registerControllerHandlerBun
 } from './controller/invoke-actions-controller'
 import { ActorCallbackConnector } from '../spawn'
-import stoppable = require('stoppable')
 
 export function sendResponse(
   status: number,
@@ -15,9 +14,7 @@ export function sendResponse(
   // this is Bun
   if (res === null) {
     if (resp && status === 200) {
-      console.log('resp?')
-
-      return new Response(Buffer.from(ActorInvocationResponse.toBinary(resp)), {
+      return new Response(ActorInvocationResponse.toBinary(resp), {
         status,
         headers: {
           'Content-Type': 'application/octet-stream',
@@ -26,7 +23,7 @@ export function sendResponse(
       })
     }
 
-    return new Response(Buffer.from(''), {
+    return new Response('', {
       status
     })
   }
@@ -49,15 +46,15 @@ export function sendResponse(
   res.end()
 }
 
-const getActionPort = () => process.env.USER_FUNCTION_PORT || 8090
+const getActionPort = (): number | string => process.env.USER_FUNCTION_PORT || 8090
 
 export function startServer(actorCallbacks: Map<string, ActorCallbackConnector>) {
   let server: any = null
 
-  if (typeof Bun.serve === 'function') {
+  if (typeof Bun !== 'undefined' && typeof Bun.serve === 'function') {
     server = Bun.serve({
       port: getActionPort(),
-      fetch(req: Request) {
+      fetch(req: Request): Promise<Response> | Response {
         const url = new URL(req.url)
         if (url.pathname === '/api/v1/actors/actions') {
           return registerControllerHandlerBun(req, actorCallbacks)
@@ -66,7 +63,10 @@ export function startServer(actorCallbacks: Map<string, ActorCallbackConnector>)
         return new Response('404!', { status: 404 })
       }
     })
+    console.log(`[SpawnSystem] Server listening on :${getActionPort()}`)
   } else {
+    const stoppable = require('stoppable')
+
     server = stoppable(
       http.createServer((req: IncomingMessage, res: ServerResponse) => {
         if (req.url === '/api/v1/actors/actions') {
@@ -85,4 +85,20 @@ export function startServer(actorCallbacks: Map<string, ActorCallbackConnector>)
   }
 
   return server
+}
+
+export async function stopServer(server: any) {
+  if (typeof Bun !== 'undefined' && typeof Bun.serve === 'function') {
+    server.stop(true)
+
+    return true
+  }
+
+  return new Promise((resolve, reject) => {
+    server.stop((err: any) => {
+      if (err) return reject()
+
+      resolve(true)
+    })
+  })
 }
