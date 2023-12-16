@@ -1,10 +1,36 @@
 import { ActorInvocationResponse } from '../protos/eigr/functions/protocol/actors/protocol'
-import http, { ServerResponse, IncomingMessage } from 'node:http'
-import { registerControllerHandler } from './controller/invoke-actions-controller'
+import http, { ServerResponse, IncomingMessage } from 'http'
+import {
+  registerControllerHandlerNode,
+  registerControllerHandlerBun
+} from './controller/invoke-actions-controller'
 import { ActorCallbackConnector } from '../spawn'
 import stoppable = require('stoppable')
 
-export function sendResponse(status: number, res: ServerResponse, resp: any = null) {
+export function sendResponse(
+  status: number,
+  res: ServerResponse | null,
+  resp: any = null
+): Response | void {
+  // this is Bun
+  if (res === null) {
+    if (resp && status === 200) {
+      console.log('resp?')
+
+      return new Response(Buffer.from(ActorInvocationResponse.toBinary(resp)), {
+        status,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-disposition': 'attachment; filename=data.json'
+        }
+      })
+    }
+
+    return new Response(Buffer.from(''), {
+      status
+    })
+  }
+
   if (status !== 200 || !resp) {
     res.writeHead(status, {})
     res.write('')
@@ -26,22 +52,37 @@ export function sendResponse(status: number, res: ServerResponse, resp: any = nu
 const getActionPort = () => process.env.USER_FUNCTION_PORT || 8090
 
 export function startServer(actorCallbacks: Map<string, ActorCallbackConnector>) {
-  const server = stoppable(
-    http.createServer((req: IncomingMessage, res: ServerResponse) => {
-      if (req.url === '/api/v1/actors/actions') {
-        registerControllerHandler(req, res, actorCallbacks)
+  let server: any = null
 
-        return
+  if (typeof Bun.serve === 'function') {
+    server = Bun.serve({
+      port: getActionPort(),
+      fetch(req: Request) {
+        const url = new URL(req.url)
+        if (url.pathname === '/api/v1/actors/actions') {
+          return registerControllerHandlerBun(req, actorCallbacks)
+        }
+
+        return new Response('404!', { status: 404 })
       }
+    })
+  } else {
+    server = stoppable(
+      http.createServer((req: IncomingMessage, res: ServerResponse) => {
+        if (req.url === '/api/v1/actors/actions') {
+          registerControllerHandlerNode(req, res, actorCallbacks)
 
-      sendResponse(404, res)
-    }),
-    process.env.NODE_ENV === 'prod' ? 30_000 : 1_000
-  )
+          return
+        }
 
-  server.listen(getActionPort(), () => {
-    console.log(`[SpawnSystem] Server listening on :${getActionPort()}`)
-  })
+        sendResponse(404, res)
+      }),
+      process.env.NODE_ENV === 'prod' ? 30_000 : 1_000
+    )
+    server.listen(getActionPort(), () => {
+      console.log(`[SpawnSystem] Server listening on :${getActionPort()}`)
+    })
+  }
 
   return server
 }

@@ -1,8 +1,9 @@
 import spawn, { SpawnSystem } from '../src/spawn'
 import { createJsonActor } from './stubs/actors'
+import { describe, beforeAll, afterAll, test, expect } from 'bun:test'
 
 describe('testing invoke', () => {
-  jest.setTimeout(30_000)
+  // jest.setTimeout(30_000)
 
   let system: SpawnSystem
 

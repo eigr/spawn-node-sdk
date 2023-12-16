@@ -1,9 +1,10 @@
 import { ChangeUserNameStatus, ChangeUserNameResponse, ChangeUserName } from './protos/user_test'
 import spawn, { payloadFor, SpawnSystem } from '../src/spawn'
 import { createPooledActor } from './stubs/actors'
+import { describe, beforeAll, afterAll, test, expect } from 'bun:test'
 
 describe('testing spawn pooled actor', () => {
-  jest.setTimeout(120_000)
+  // jest.setTimeout(120_000)
 
   let system: SpawnSystem
 

@@ -7,9 +7,10 @@ import {
 import * as crypto from 'crypto'
 import spawn, { payloadFor, SpawnSystem } from '../src/spawn'
 import { createRandomActor, createUserActor } from './stubs/actors'
+import { describe, beforeAll, afterAll, test, expect } from 'bun:test'
 
 describe('testing invoke', () => {
-  jest.setTimeout(120_000)
+  // jest.setTimeout(120_000)
 
   const randomActorName = crypto.randomUUID()
   let system: SpawnSystem

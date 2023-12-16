@@ -24,7 +24,8 @@
     "proto-gen-spawn-state": "protoc --ts_out ./src/protos/eigr/functions/protocol/actors --proto_path protos/eigr/functions/protocol/actors protos/eigr/functions/protocol/actors/state.proto",
     "start": "ts-node --esm --require tsconfig-paths/register index.ts",
     "run-benchmark": "ts-node --esm --require tsconfig-paths/register benchmark/benchmark.ts",
-    "test": "jest --forceExit --runInBand --detectOpenHandles",
+    "run-benchmark-bun": "bun run benchmark/benchmark.ts",
+    "test": "bun test --forceExit --runInBand --detectOpenHandles",
     "format": "prettier --config .prettierrc '{src,test}/**/*.ts' --write"
   },
   "author": "eigr",

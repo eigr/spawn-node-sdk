@@ -229,7 +229,7 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
     },
     destroy: async () => {
       return new Promise((resolve, reject) => {
-        server.stop((err) => {
+        server.stop((err: any) => {
           if (err) return reject()
 
           registered = false

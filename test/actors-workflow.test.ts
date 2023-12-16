@@ -2,13 +2,14 @@ import { UserState, ChangeUserNameResponse, ChangeUserName } from './protos/user
 import * as crypto from 'crypto'
 import spawn, { payloadFor, SpawnSystem } from '../src/spawn'
 import { createRandomActor, createUserActor } from './stubs/actors'
+import { describe, beforeAll, afterAll, test, expect } from 'bun:test'
 
 function timeout(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 describe('testing workflows', () => {
-  jest.setTimeout(5_000)
+  // jest.setTimeout(5_000)
 
   const randomActorName = crypto.randomUUID()
   let system: SpawnSystem

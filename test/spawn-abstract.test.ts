@@ -1,6 +1,7 @@
 import { ChangeUserNameStatus, ChangeUserNameResponse, ChangeUserName } from './protos/user_test'
 import spawn, { payloadFor, SpawnSystem } from '../src/spawn'
 import { createUnnamedActor } from './stubs/actors'
+import { describe, beforeAll, afterAll, test, expect } from 'bun:test'
 
 describe('testing spawn unnamed actor', () => {
   let system: SpawnSystem
