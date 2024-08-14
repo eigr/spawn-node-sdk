@@ -50,13 +50,13 @@ export const createUserActor = (system: SpawnSystem) => {
   })
 
   actor.addAction(
-    { name: 'pipeTest', payloadType: ChangeUserName },
+    { name: 'pipeTest', payloadType: ChangeUserName, responseType: ChangeUserName },
     async (context: ActorContext<UserState>, payload: ChangeUserName) => {
       const name = 'pipe_initial'
 
       return Value.of<UserState, ChangeUserName>()
         .state({ ...context.state, name })
-        .response(ChangeUserName, { newName: `${payload.newName}Internal` })
+        .response({ newName: `${payload.newName}Internal` })
         .pipe({ actorName: 'userActorTransformerTest', action: 'transform' })
     }
   )
@@ -166,7 +166,7 @@ export const createJsonActor = (system: SpawnSystem) => {
   })
 
   actor.addAction(
-    { name: 'plusOne' },
+    { name: 'plusOne', responseType: 'json' },
     async (context: ActorContext<ActorState>, { value }: any) => {
       const sum = (value || 0) + 1
 

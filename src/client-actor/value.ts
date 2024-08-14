@@ -1,6 +1,8 @@
 import { Broadcast, Effect, Forward, Pipe } from './workflows'
 import { PayloadRef } from '../integration/parsers'
 import { MessageType } from '@protobuf-ts/runtime'
+import { SpawnActorError } from '../integration/errors'
+import { Noop } from '../protos/eigr/functions/protocol/actors/protocol'
 import { payloadFor } from '../spawn'
 
 export class Value<T extends object = object, K extends object = object> {
@@ -58,15 +60,43 @@ export class Value<T extends object = object, K extends object = object> {
     return this
   }
 
-  parse() {
+  parse(responseType?: MessageType<any> | 'json') {
     return {
       state: this._state,
-      value: this._response,
+      value: this.buildResponse(responseType),
       broadcast: this._broadcast,
       pipe: this._pipe,
       forward: this._forward,
       effects: this._effects,
       tags: this._tags
     }
+  }
+
+  private buildResponse(responseType?: MessageType<any> | 'json') {
+    if (!this._response) {
+      return
+    }
+
+    if (Noop.is(this._response)) {
+      return this._response
+    }
+
+    if ((this._response as PayloadRef<any>).ref !== undefined && (this._response as PayloadRef<any>).instance) {
+      return this._response
+    }
+
+    if (!responseType) {
+      throw new SpawnActorError('You have to define a valid responseType in your actor action and set response with a correct type')
+    }
+  
+    if (responseType === 'json') {
+      return this._response
+    }
+
+    if (responseType && responseType.is(this._response)) {
+      return payloadFor(responseType, this._response)
+    }
+
+    throw new SpawnActorError('Specified responseType and response missmatch')
   }
 }

@@ -22,12 +22,12 @@ This lib supports both Bun and NodeJS runtimes, Bun performs invocations ~2x fas
 import spawn, { ActorContext, Value } from '@eigr/spawn-sdk'
 import { UserState, ChangeUserNamePayload, ChangeUserNameStatus } from 'src/protos/examples/user_example'
 
-const system = spawn.createSystem('SpawnSystemName')
+const system = spawn.createSystem('spawn-system')
 
 // You can register multiple actors with different options
 const actor = system.buildActor({
   name: 'exampleActor',
-  stateType: UserState, // or 'json' if you don't want to use protobufs
+  stateType: UserState,
   stateful: true,
   snapshotTimeout: 10_000n,
   deactivatedTimeout: 60_000n
@@ -37,12 +37,11 @@ const actor = system.buildActor({
 const setNameHandler = async (context: ActorContext<UserState>, payload: ChangeUserNamePayload) => {
   return Value.of<UserState, ChangeUserNameResponse>()
     .state({ name: payload.newName })
-    .response(ChangeUserNameResponse, { status: ChangeUserNameStatus.OK })
+    .response({ status: ChangeUserNameStatus.OK })
 }
 
 // This is similar to a Route definition in REST
-// the default payloadType is 'json'
-actor.addAction({ name: 'setName', payloadType: ChangeUserNamePayload }, setNameHandler)
+actor.addAction({ name: 'SetName', payloadType: ChangeUserNamePayload, responseType: ChangeUserNameResponse }, setNameHandler)
 
 system.register()
   .then(() => console.log('Spawn System registered'))
@@ -59,14 +58,14 @@ import { UserState, ChangeUserNamePayload, ChangeUserNameResponse } from 'src/pr
   const response: ChangeUserNameResponse = await spawn.invoke('exampleActor', {
     action: 'setName',
     response: ChangeUserNameResponse,
-    payload: payloadFor(ChangeUserNamePayload, payload)
-    // system: 'SpawnSystemName'
+    payload: payloadFor(ChangeUserNamePayload, payload),
+    system: 'spawn-system'
   })
 
   const state: UserState = await spawn.invoke('exampleActor', {
     action: 'getState',
     response: UserState,
-    // system: 'SpawnSystemName'
+    system: 'spawn-system'
   })
 
   console.log(state) // { name: 'changedName' }
@@ -113,7 +112,7 @@ With this, it should generate a file at `src/protos/examples/user_example.ts`, w
 You'll need to make sure Spawn Proxy service is up and running.
 With `docker-compose` you can define:
 
-> **_NOTE:_** _using docker is recommended for `dev purposes only`, see [spawn deploy](https://github.com/eigr/spawn#getting-started) for production examples._
+> **_NOTE:_** _you can start the proxy using the `spawn cli`, see [spawn deploy](https://github.com/eigr/spawn#getting-started) for production examples._
 
 ```YML
 version: "3.8"

@@ -42,7 +42,7 @@ async function register(
     return sendResponse(200, res, resp)
   }
 
-  const { stateType, payloadType, callback } = callbackData
+  const { stateType, payloadType, responseType, callback } = callbackData
 
   const state = currentContext!.state && unpack(currentContext!.state, stateType)
   const context: ActorContext<any> = {
@@ -69,7 +69,7 @@ async function register(
 
   try {
     const value = await callback(context, finalPayload)
-    const parsedValue = value.parse()
+    const parsedValue = value.parse(responseType)
 
     const response = ActorInvocationResponse.create({
       actorName: actor?.name,
@@ -91,7 +91,7 @@ async function register(
 
     return sendResponse(200, res, response)
   } catch (error) {
-    console.error(error)
+    console.error(`Error when calling: ${actor?.name}.${actionName} | ${(error as any)?.message}`)
 
     return sendResponse(400, res)
   }

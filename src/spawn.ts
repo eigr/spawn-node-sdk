@@ -36,6 +36,7 @@ import { Value } from './client-actor/value'
 export type ActorActionOpts = {
   name: string
   payloadType?: MessageType<any> | 'json'
+  responseType?: MessageType<any> | 'json'
   timer?: number
 }
 
@@ -47,6 +48,7 @@ export type ActorActionCallback<T extends object = any, K extends object = any> 
 export type ActorCallbackConnector = {
   stateType: MessageType<any> | 'json'
   payloadType: MessageType<any> | 'json'
+  responseType: MessageType<any> | 'json'
   callback: ActorActionCallback
 }
 
@@ -173,22 +175,20 @@ const createSystem = (system: string = uniqueDefaultSystem): SpawnSystem => {
         addAction: (actionOpts: ActorActionOpts, callback: ActorActionCallback) => {
           if (registered) throw new SpawnSystemRegisteredError(registeredErrorMsg)
 
-          const derfaultActionOpts = { payloadType: 'json' }
-          const overridenActionOpts = { ...derfaultActionOpts, ...actionOpts } as ActorActionOpts
-
-          if (overridenActionOpts.timer) {
+          if (actionOpts.timer) {
             actor.timerActions.push({
-              action: { name: overridenActionOpts.name },
-              seconds: overridenActionOpts.timer
+              action: { name: actionOpts.name },
+              seconds: actionOpts.timer
             })
           } else {
-            actor.actions.push({ name: overridenActionOpts.name })
+            actor.actions.push({ name: actionOpts.name })
           }
 
-          registeredCallbacks.set(`${system}${actorName}${overridenActionOpts.name}`, {
+          registeredCallbacks.set(`${system}${actorName}${actionOpts.name}`, {
             callback,
             stateType: overridenOpts.stateType || Noop,
-            payloadType: overridenActionOpts.payloadType || Noop
+            payloadType: actionOpts.payloadType || Noop,
+            responseType: actionOpts.responseType || Noop
           })
         }
       }
