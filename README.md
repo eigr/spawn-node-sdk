@@ -1,6 +1,6 @@
 # [Spawn](https://github.com/eigr/spawn)
 
-**Actor model framework for Node/Bun**
+**Spawn Actor Mesh Runtime for Node/Bun**
 
 ## **Installation**
 
@@ -50,13 +50,13 @@ curl -vvv -H 'Accept: application/json' http://localhost:9980/v1/hello_world?mes
 ```
 
 ## **Documentation**
-- [Basic usage](./documentation/basic-usage.md)
 - [Actor options](./documentation/actor-options.md)
   - [Unnamed](./documentation/actor-options.md#unnamed-actor)
   - [Named](./documentation/actor-options.md#named-actor)
   - [Default Actions](./documentation/actor-options.md#default-actions)
 - [Actor workflows](./documentation/actor-workflows.md)
 - [Invocations](./documentation/invocations.md)
+- [More info on Spawn](https://github.com/eigr/spawn/blob/main/docs/index.md)
 
 ## **Examples**
 
