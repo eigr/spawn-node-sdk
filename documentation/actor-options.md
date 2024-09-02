@@ -26,11 +26,11 @@ const actor = system.buildActor({
 const setNameHandler = async (context: ActorContext<UserState>, payload: ChangeUserNamePayload) => {
   return Value.of<UserState, ChangeUserNameResponse>()
     .state({ name: payload.newName })
-    .response(ChangeUserNameResponse, { status: ChangeUserNameStatus.OK })
+    .response({ status: ChangeUserNameStatus.OK })
 }
 
 // This is similar to a Route definition in REST
-actor.addAction({ name: 'setName', payloadType: ChangeUserNamePayload }, setNameHandler)
+actor.addAction({ name: 'setName', payloadType: ChangeUserNamePayload, responseType: ChangeUserNameResponse }, setNameHandler)
 
 system.register()
   .then(() => console.log('Spawn System registered'))
@@ -72,10 +72,10 @@ const actor = system.buildActor({
 const setNameHandler = async (context: ActorContext<UserState>, payload: ChangeUserNamePayload) => {
   return Value.of<UserState, ChangeUserNameResponse>()
     .state({ name: payload.newName })
-    .response(ChangeUserNameResponse, { status: ChangeUserNameStatus.OK })
+    .response({ status: ChangeUserNameStatus.OK })
 }
 
-actor.addAction({ name: 'setName', payloadType: ChangeUserNamePayload }, setNameHandler)
+actor.addAction({ name: 'setName', payloadType: ChangeUserNamePayload, responseType: ChangeUserNameResponse }, setNameHandler)
 
 system.register()
   .then(() => console.log('Spawn System registered'))
@@ -120,10 +120,10 @@ const somethingHandler = async (context: ActorContext<Noop>, payload: SomethingA
   // payload = something
 
   return Value.of<any, SomethingActionResponse>()
-    .response(SomethingActionResponse, { something: true })
+    .response({ something: true })
 }
 
-actor.addAction({ name: 'handleSomething', payloadType: SomethingActionPayload }, somethingHandler)
+actor.addAction({ name: 'handleSomething', payloadType: SomethingActionPayload, responseType: SomethingActionResponse }, somethingHandler)
 
 system.register()
   .then(() => console.log('Spawn System registered'))
