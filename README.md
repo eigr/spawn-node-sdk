@@ -7,7 +7,7 @@
 ### Install Spawn CLI
 
 ```SH
-curl -sSL https://github.com/eigr/spawn/releases/download/v1.4.2/install.sh | sh
+curl -sSL https://github.com/eigr/spawn/releases/download/v1.4.3/install.sh | sh
 ```
 
 # **Getting Started**
