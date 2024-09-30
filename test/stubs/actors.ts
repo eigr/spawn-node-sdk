@@ -244,3 +244,28 @@ export const createPooledActor = (system: SpawnSystem) => {
 
   return actor
 }
+
+export const createTaskActor = (system: SpawnSystem) => {
+  const actor = system.buildActor({
+    name: 'Jose',
+    kind: Kind.TASK,
+    stateType: UserState,
+    stateful: true
+  })
+
+  actor.addAction(
+    { name: 'executeTask', payloadType: ChangeUserName },
+    async (context: ActorContext<UserState>, message: ChangeUserName) => {
+      const response = ChangeUserNameResponse.create({
+        newName: message.newName + 'TaskCalled',
+        status: ChangeUserNameStatus.OK
+      })
+
+      return Value.of<UserState, ChangeUserNameResponse>()
+        .state({ ...context.state, name: message.newName + 'TaskCalled' })
+        .response(ChangeUserNameResponse, response)
+    }
+  )
+
+  return actor
+}

@@ -82,7 +82,7 @@ export const buildActorForSystem = (system: string, opts: ActorOpts): Actor => {
     }) || []
 
   const metadata: Metadata = { channelGroup, tags: {} }
-  const id = { name: opts.name, system } as ActorId
+  const id = { name: opts.name, system, parent: '' } as ActorId
 
   if (opts.kind === Kind.UNNAMED) {
     id.parent = opts.name

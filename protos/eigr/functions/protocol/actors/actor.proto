@@ -113,6 +113,8 @@ enum Kind {
     
     // Reserved for future use
     PROXY = 4;
+
+    TASK = 5;
 }
 
 message ActorSettings {
